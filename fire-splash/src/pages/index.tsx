@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
@@ -137,6 +137,13 @@ export default function IndexPage() {
 
   const isBusy = status === "starting" || status === "crawling" || status === "extracting";
 
+  const progressPercent = useMemo(() => {
+    if (!progress) return null;
+    if (!progress.total) return null;
+    if (progress.total <= 0) return null;
+    return Math.min(100, Math.round((progress.completed / progress.total) * 100));
+  }, [progress]);
+
   const statusLabel = useMemo(() => {
     if (status === "starting") return "Starting crawl...";
     if (status === "crawling") return "Crawling pages...";
@@ -145,6 +152,30 @@ export default function IndexPage() {
     if (status === "error") return "Something went wrong.";
     return "Ready.";
   }, [status]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!isBusy) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [isBusy]);
+
+  useEffect(() => {
+    if (!isBusy) {
+      document.title = "Web Flayer";
+      return;
+    }
+
+    if (status === "crawling" && progress && progress.total) {
+      document.title = `Web Flayer (${progress.completed}/${progress.total})`;
+      return;
+    }
+
+    document.title = "Web Flayer (Flaying...)";
+  }, [isBusy, progress, status]);
 
   const formatApiError = (data: any, fallback: string) => {
     const parts: string[] = [];
@@ -393,6 +424,39 @@ export default function IndexPage() {
       {/* Background Layer */}
       <DoomFire />
 
+      {isBusy ? (
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <div className="h-1 bg-white/10 overflow-hidden">
+            <div
+              className={[
+                "h-full",
+                status === "extracting" ? "bg-primary/80" : "bg-warning/80",
+                progressPercent === null ? "animate-pulse w-1/3" : "transition-all duration-500",
+              ].join(" ")}
+              style={
+                progressPercent === null
+                  ? undefined
+                  : { width: status === "extracting" ? "100%" : `${progressPercent}%` }
+              }
+            />
+          </div>
+          <div className="px-4 py-2 bg-black/50 border-b border-white/10 backdrop-blur-md">
+            <div className="max-w-5xl mx-auto flex items-center justify-between">
+              <p className="text-[10px] text-white/60 font-mono tracking-[0.25em] uppercase">
+                {statusLabel}
+              </p>
+              <p className="text-[10px] text-white/40 font-mono tracking-[0.25em] uppercase">
+                {status === "crawling" && progress
+                  ? `${progress.completed}/${progress.total || "?"} pages`
+                  : status === "extracting"
+                    ? "Generating brief"
+                    : "Working"}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <main className="relative z-10 w-full max-w-5xl px-6 flex flex-col gap-14 items-center">
 
         {/* Hero Section */}
@@ -553,6 +617,88 @@ export default function IndexPage() {
 
           
         </section>
+
+        {isBusy && !result ? (
+          <section className="w-full">
+            <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+              <CardHeader className="pb-0 pt-5 px-5 flex-col items-start gap-2">
+                <p className="text-tiny uppercase font-bold text-warning/80">
+                  Web Flayer is working
+                </p>
+                <h4 className="font-bold text-xl text-white">
+                  Keep this tab open. We'll finish the brief here.
+                </h4>
+                <p className="text-xs text-white/40 font-mono uppercase tracking-widest">
+                  {statusLabel}
+                </p>
+              </CardHeader>
+              <CardBody className="overflow-visible py-5">
+                <div className="w-full">
+                  <div className="flex items-center justify-between text-[10px] text-white/40 font-mono uppercase tracking-widest mb-2">
+                    <span>
+                      {status === "crawling" && progress
+                        ? `${progress.completed}/${progress.total || "?"} pages`
+                        : status === "extracting"
+                          ? "Generating"
+                          : "Starting"}
+                    </span>
+                    <span>
+                      {progressPercent !== null && status === "crawling"
+                        ? `${progressPercent}%`
+                        : status === "extracting"
+                          ? "Almost there"
+                          : "Calculating"}
+                    </span>
+                  </div>
+                  <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className={[
+                        "h-full",
+                        status === "extracting" ? "bg-primary/70" : "bg-warning/70",
+                        progressPercent === null ? "animate-pulse w-1/3" : "transition-all duration-500",
+                      ].join(" ")}
+                      style={
+                        progressPercent === null
+                          ? undefined
+                          : { width: status === "extracting" ? "100%" : `${progressPercent}%` }
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4 mt-6">
+                  <div className="rounded-lg border border-white/10 bg-black/40 p-4">
+                    <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">
+                      Step 1
+                    </p>
+                    <p className="text-sm text-white/80 font-semibold">Map the site</p>
+                    <p className="text-xs text-white/40 mt-2">
+                      We find the pages that matter (pricing, FAQ, proof, policies).
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/40 p-4">
+                    <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">
+                      Step 2
+                    </p>
+                    <p className="text-sm text-white/80 font-semibold">Extract meaning</p>
+                    <p className="text-xs text-white/40 mt-2">
+                      Claude turns messy pages into structured facts with citations.
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/40 p-4">
+                    <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">
+                      Step 3
+                    </p>
+                    <p className="text-sm text-white/80 font-semibold">Format the brief</p>
+                    <p className="text-xs text-white/40 mt-2">
+                      We render a clean report you can share or export as PDF.
+                    </p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </section>
+        ) : null}
 
         {result ? (
           <section className="w-full">
