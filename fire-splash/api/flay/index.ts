@@ -4,7 +4,7 @@ import {
   DEFAULT_MODEL,
   safeJsonParse,
   trimContent,
-} from "./shared";
+} from "./shared.js";
 
 const FIRECRAWL_BASE = "https://api.firecrawl.dev/v2";
 

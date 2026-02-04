@@ -1,8 +1,6 @@
 const CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages";
 export const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 
-export type SourceChunk = { url: string; title: string; content: string };
-
 export function trimContent(content: string, maxChars: number) {
   const compact = content.replace(/\s+/g, " ").trim();
   if (compact.length <= maxChars) return compact;
@@ -28,10 +26,6 @@ export function buildPrompt({
   goal,
   mode,
   sources,
-}: {
-  goal: string;
-  mode: "executive" | "thorough";
-  sources: SourceChunk[];
 }) {
   const limits =
     mode === "thorough"
@@ -145,11 +139,6 @@ export async function callClaude({
   maxTokens,
   model,
   apiKey,
-}: {
-  prompt: string;
-  maxTokens: number;
-  model: string;
-  apiKey: string;
 }) {
   const response = await fetch(CLAUDE_ENDPOINT, {
     method: "POST",
