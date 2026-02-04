@@ -154,6 +154,19 @@ export default function IndexPage() {
     return message || fallback;
   };
 
+  const readResponseBody = async (response: Response) => {
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      try {
+        return { data: await response.json(), rawText: null };
+      } catch {
+        // fall through to text
+      }
+    }
+    const text = await response.text();
+    return { data: null, rawText: text };
+  };
+
   const startFlay = async (overrideUrl?: string | null) => {
     const safeOverride = typeof overrideUrl === "string" ? overrideUrl : null;
     let targetUrl = safeOverride ? safeOverride.trim() : urlInput.trim();
@@ -177,8 +190,11 @@ export default function IndexPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: targetUrl, goal, mode }),
       });
-      const data = await response.json();
+      const { data, rawText } = await readResponseBody(response);
       if (!response.ok || !data?.jobId) {
+        if (rawText) {
+          throw new Error(`API error: ${rawText.slice(0, 200)}`);
+        }
         throw new Error(formatApiError(data, "Unable to start crawl."));
       }
       setStatus("crawling");
@@ -194,8 +210,11 @@ export default function IndexPage() {
       const response = await fetch(
         `/api/flay/${id}?mode=${mode}&goal=${encodeURIComponent(goal)}`,
       );
-      const data = await response.json();
+      const { data, rawText } = await readResponseBody(response);
       if (!response.ok) {
+        if (rawText) {
+          throw new Error(`API error: ${rawText.slice(0, 200)}`);
+        }
         throw new Error(formatApiError(data, "Status check failed."));
       }
 
