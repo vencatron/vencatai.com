@@ -1,8 +1,10 @@
+import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
+import { jsPDF } from "jspdf";
 import { DoomFire } from "@/components/DoomFire";
 
 // Globe icon for URL input
@@ -75,7 +77,265 @@ const ApiIcon = () => (
   </svg>
 );
 
+const GOALS = [
+  "Competitor Snapshot",
+  "Pricing & Offers",
+  "FAQ Digest",
+  "Trust Signals",
+  "Team & Contact",
+  "Press Kit",
+] as const;
+
+const MODES = [
+  { label: "Executive", value: "executive" },
+  { label: "Thorough", value: "thorough" },
+] as const;
+
+type FlayMode = (typeof MODES)[number]["value"];
+type FlayStatus = "idle" | "starting" | "crawling" | "extracting" | "done" | "error";
+
+type FlayResult = {
+  title?: string;
+  one_liner?: string;
+  executive_summary?: string;
+  key_facts?: { label: string; value: string; source_url: string; evidence: string }[];
+  pricing_offers?: {
+    plan: string;
+    price: string;
+    notes: string;
+    source_url: string;
+    evidence: string;
+  }[];
+  claims_proof?: {
+    claim: string;
+    proof: string;
+    source_url: string;
+    evidence: string;
+  }[];
+  faqs_policies?: {
+    question: string;
+    answer: string;
+    source_url: string;
+    evidence: string;
+  }[];
+  trust_signals?: { signal: string; source_url: string; evidence: string }[];
+  risks_gaps?: string[];
+  sources?: { url: string; title?: string }[];
+};
+
 export default function IndexPage() {
+  const [urlInput, setUrlInput] = useState("");
+  const [goal, setGoal] = useState<(typeof GOALS)[number]>("Competitor Snapshot");
+  const [mode, setMode] = useState<FlayMode>("executive");
+  const [status, setStatus] = useState<FlayStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<FlayResult | null>(null);
+  const [pagesUsed, setPagesUsed] = useState<number | null>(null);
+
+  const isBusy = status === "starting" || status === "crawling" || status === "extracting";
+
+  const statusLabel = useMemo(() => {
+    if (status === "starting") return "Starting crawl...";
+    if (status === "crawling") return "Crawling pages...";
+    if (status === "extracting") return "Extracting the brief...";
+    if (status === "done") return "Brief ready.";
+    if (status === "error") return "Something went wrong.";
+    return "Ready.";
+  }, [status]);
+
+  const formatApiError = (data: any, fallback: string) => {
+    const parts: string[] = [];
+    if (typeof data?.error === "string") parts.push(data.error);
+    if (typeof data?.detail === "string") parts.push(data.detail);
+    if (typeof data?.detail?.message === "string") parts.push(data.detail.message);
+    if (typeof data?.detail?.error === "string") parts.push(data.detail.error);
+    if (typeof data?.raw === "string") parts.push(data.raw);
+    const message = parts.filter(Boolean).join(" | ");
+    return message || fallback;
+  };
+
+  const startFlay = async (overrideUrl?: string | null) => {
+    const safeOverride = typeof overrideUrl === "string" ? overrideUrl : null;
+    let targetUrl = safeOverride ? safeOverride.trim() : urlInput.trim();
+    if (!targetUrl) {
+      setError("Add a URL to flay.");
+      setStatus("error");
+      return;
+    }
+    if (!/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = `https://${targetUrl}`;
+    }
+
+    setError(null);
+    setResult(null);
+    setPagesUsed(null);
+    setStatus("starting");
+
+    try {
+      const response = await fetch("/api/flay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: targetUrl, goal, mode }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.jobId) {
+        throw new Error(formatApiError(data, "Unable to start crawl."));
+      }
+      setStatus("crawling");
+      pollStatus(data.jobId, 0);
+    } catch (err: any) {
+      setError(err?.message || "Unable to start crawl.");
+      setStatus("error");
+    }
+  };
+
+  const pollStatus = async (id: string, attempt: number) => {
+    try {
+      const response = await fetch(
+        `/api/flay/${id}?mode=${mode}&goal=${encodeURIComponent(goal)}`,
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(formatApiError(data, "Status check failed."));
+      }
+
+      if (data?.status && data.status !== "completed") {
+        if (data.status === "failed") {
+          throw new Error("Crawl failed.");
+        }
+        setStatus("crawling");
+        if (attempt < 60) {
+          setTimeout(() => pollStatus(id, attempt + 1), 2500);
+        } else {
+          throw new Error("Crawl timed out.");
+        }
+        return;
+      }
+
+      if (data?.status === "completed") {
+        setStatus("extracting");
+        if (data?.result) {
+          setResult(data.result);
+          setPagesUsed(data?.meta?.pages_used ?? null);
+          setStatus("done");
+        } else {
+          throw new Error("No result returned.");
+        }
+      }
+    } catch (err: any) {
+      setError(err?.message || "Unable to fetch result.");
+      setStatus("error");
+    }
+  };
+
+  const downloadPdf = () => {
+    if (!result) return;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const margin = 48;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    const addPageIfNeeded = (height: number) => {
+      if (y + height > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    };
+
+    const addHeading = (text: string) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      addPageIfNeeded(24);
+      doc.text(text, margin, y);
+      y += 24;
+    };
+
+    const addSubheading = (text: string) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      addPageIfNeeded(18);
+      doc.text(text, margin, y);
+      y += 18;
+    };
+
+    const addBody = (text: string) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        addPageIfNeeded(14);
+        doc.text(line, margin, y);
+        y += 14;
+      });
+      y += 6;
+    };
+
+    const addList = (items: string[]) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      items.forEach((item) => {
+        const lines = doc.splitTextToSize(`- ${item}`, maxWidth);
+        lines.forEach((line: string) => {
+          addPageIfNeeded(14);
+          doc.text(line, margin, y);
+          y += 14;
+        });
+      });
+      y += 6;
+    };
+
+    addHeading(result.title || "Web Flayer Brief");
+    addBody(result.one_liner || "");
+    addBody(result.executive_summary || "");
+
+    if (result.key_facts?.length) {
+      addSubheading("Key Facts");
+      addList(result.key_facts.map((fact) => `${fact.label}: ${fact.value}`));
+    }
+
+    if (result.pricing_offers?.length) {
+      addSubheading("Pricing & Offers");
+      addList(
+        result.pricing_offers.map(
+          (offer) => `${offer.plan}: ${offer.price} ${offer.notes || ""}`.trim(),
+        ),
+      );
+    }
+
+    if (result.claims_proof?.length) {
+      addSubheading("Claims & Proof");
+      addList(
+        result.claims_proof.map((claim) => `${claim.claim} (${claim.proof})`),
+      );
+    }
+
+    if (result.faqs_policies?.length) {
+      addSubheading("FAQs & Policies");
+      addList(
+        result.faqs_policies.map((faq) => `Q: ${faq.question} A: ${faq.answer}`),
+      );
+    }
+
+    if (result.trust_signals?.length) {
+      addSubheading("Trust Signals");
+      addList(result.trust_signals.map((signal) => signal.signal));
+    }
+
+    if (result.risks_gaps?.length) {
+      addSubheading("Risks & Gaps");
+      addList(result.risks_gaps);
+    }
+
+    if (result.sources?.length) {
+      addSubheading("Sources");
+      addList(result.sources.map((source) => source.url));
+    }
+
+    doc.save("web-flayer-brief.pdf");
+  };
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-x-hidden">
       {/* Background Layer */}
@@ -92,7 +352,7 @@ export default function IndexPage() {
             className="text-6xl md:text-8xl font-black tracking-widest text-white mb-4 mix-blend-difference"
             style={{ fontFamily: '"Michroma", sans-serif' }}
           >
-            SCRAPR
+            WEB FLAYER
           </h1>
           <p className="text-lg md:text-2xl text-white/70 font-mono tracking-widest uppercase mb-4">
             Turn any webpage into a one-page brief.
@@ -108,7 +368,7 @@ export default function IndexPage() {
                 classNames={{
                   base: "flex-1",
                   mainWrapper: "h-full",
-                  input: "text-sm text-white/80 placeholder:text-white/30",
+                  input: "text-sm !text-white caret-white placeholder:!text-white/50",
                   inputWrapper: [
                     "h-12",
                     "bg-black/40",
@@ -120,33 +380,257 @@ export default function IndexPage() {
                     "backdrop-blur-md",
                     "hover:bg-black/50",
                     "group-data-[focus=true]:bg-black/50",
+                    "group-data-[focus=true]:!bg-black/50",
                     "!cursor-text",
                   ].join(" "),
                 }}
                 placeholder="https://example.com/products"
                 startContent={<GlobeIcon />}
-                type="url"
+                type="text"
+                inputMode="url"
+                value={urlInput}
+                onChange={(event) => setUrlInput(event.target.value)}
               />
               <Button
                 className="h-12 font-bold rounded-none rounded-r-lg px-8 tracking-wider"
                 color="warning"
                 size="lg"
                 variant="shadow"
+                isDisabled={isBusy}
+                onPress={() => startFlay()}
               >
-                GENERATE BRIEF
+                {isBusy ? "FLAYING..." : "GENERATE BRIEF"}
               </Button>
             </div>
           </div>
 
-          <Button
-            size="lg"
-            color="warning"
-            variant="shadow"
-            className="font-bold rounded-none px-12 tracking-widest"
-          >
-            SEE A LIVE EXAMPLE
-          </Button>
+          <div className="flex flex-col items-center gap-4 mb-6">
+            <div className="flex flex-wrap justify-center gap-2">
+              {GOALS.map((item) => {
+                const isActive = goal === item;
+                return (
+                  <Chip
+                    key={item}
+                    onClick={() => {
+                      if (!isBusy) setGoal(item);
+                    }}
+                    classNames={{
+                      base: [
+                        "border",
+                        "transition-colors",
+                        "cursor-pointer",
+                        isActive
+                          ? "bg-warning/30 border-warning/60"
+                          : "bg-black/40 border-white/10 hover:bg-white/10",
+                      ].join(" "),
+                      content: [
+                        "text-xs font-mono tracking-wider",
+                        isActive ? "text-warning-200" : "text-white/70",
+                      ].join(" "),
+                    }}
+                    size="sm"
+                    variant="bordered"
+                  >
+                    {item}
+                  </Chip>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-2">
+              {MODES.map((item) => {
+                const isActive = mode === item.value;
+                return (
+                  <Button
+                    key={item.value}
+                    size="sm"
+                    variant={isActive ? "shadow" : "bordered"}
+                    color={isActive ? "warning" : "default"}
+                    className="rounded-none tracking-widest uppercase"
+                    onPress={() => setMode(item.value)}
+                    isDisabled={isBusy}
+                  >
+                    {item.label}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <p className="text-xs text-white/50 font-mono tracking-[0.2em] uppercase">
+              {statusLabel}
+              {pagesUsed ? ` (${pagesUsed} pages)` : ""}
+            </p>
+            {error ? (
+              <p className="text-xs text-danger-400 font-mono tracking-[0.2em] uppercase">
+                {error}
+              </p>
+            ) : null}
+          </div>
+
+          
         </section>
+
+        {result ? (
+          <section className="w-full">
+            <p className="text-center text-white/40 text-sm font-mono tracking-wider uppercase mb-5">
+              Web Flayer brief
+            </p>
+            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+              <Card className="bg-black/50 border border-white/10 backdrop-blur-md shadow-2xl">
+                <CardHeader className="pb-0 pt-5 px-5 flex-col items-start gap-2">
+                  <p className="text-tiny uppercase font-bold text-warning/80">
+                    Executive summary
+                  </p>
+                  <h4 className="font-bold text-2xl text-white">
+                    {result.title || "Web Flayer Brief"}
+                  </h4>
+                  {result.one_liner ? (
+                    <p className="text-xs text-white/50 font-mono uppercase tracking-widest">
+                      {result.one_liner}
+                    </p>
+                  ) : null}
+                </CardHeader>
+                <CardBody className="overflow-visible py-5">
+                  <p className="text-default-300 text-sm leading-relaxed">
+                    {result.executive_summary || "No summary returned yet."}
+                  </p>
+                </CardBody>
+              </Card>
+
+              <div className="flex flex-col gap-6">
+                <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                  <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                    <p className="text-tiny uppercase font-bold text-success/80">Key facts</p>
+                    <h4 className="font-bold text-large text-white">What matters fast</h4>
+                  </CardHeader>
+                  <CardBody className="overflow-visible py-4">
+                    <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                      {(result.key_facts || []).map((fact) => (
+                        <li key={`${fact.label}-${fact.value}`}>
+                          {fact.label}: {fact.value}
+                        </li>
+                      ))}
+                      {(result.key_facts || []).length === 0 ? (
+                        <li>No key facts found.</li>
+                      ) : null}
+                    </ul>
+                  </CardBody>
+                </Card>
+
+                <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                  <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                    <p className="text-tiny uppercase font-bold text-primary/80">
+                      Pricing & offers
+                    </p>
+                    <h4 className="font-bold text-large text-white">Plans and pricing</h4>
+                  </CardHeader>
+                  <CardBody className="overflow-visible py-4">
+                    <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                      {(result.pricing_offers || []).map((offer) => (
+                        <li key={`${offer.plan}-${offer.price}`}>
+                          {offer.plan}: {offer.price} {offer.notes || ""}
+                        </li>
+                      ))}
+                      {(result.pricing_offers || []).length === 0 ? (
+                        <li>No pricing details found.</li>
+                      ) : null}
+                    </ul>
+                  </CardBody>
+                </Card>
+
+                <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                  <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                    <p className="text-tiny uppercase font-bold text-warning/80">Claims</p>
+                    <h4 className="font-bold text-large text-white">Claims & proof</h4>
+                  </CardHeader>
+                  <CardBody className="overflow-visible py-4">
+                    <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                      {(result.claims_proof || []).map((claim) => (
+                        <li key={`${claim.claim}-${claim.proof}`}>
+                          {claim.claim} ({claim.proof})
+                        </li>
+                      ))}
+                      {(result.claims_proof || []).length === 0 ? (
+                        <li>No claims captured.</li>
+                      ) : null}
+                    </ul>
+                  </CardBody>
+                </Card>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 w-full mt-6">
+              <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                  <p className="text-tiny uppercase font-bold text-success/80">FAQ</p>
+                  <h4 className="font-bold text-large text-white">FAQs & policies</h4>
+                </CardHeader>
+                <CardBody className="overflow-visible py-4">
+                  <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                    {(result.faqs_policies || []).map((faq) => (
+                      <li key={`${faq.question}-${faq.answer}`}>
+                        {faq.question}: {faq.answer}
+                      </li>
+                    ))}
+                    {(result.faqs_policies || []).length === 0 ? (
+                      <li>No FAQs found.</li>
+                    ) : null}
+                  </ul>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                  <p className="text-tiny uppercase font-bold text-primary/80">Signals</p>
+                  <h4 className="font-bold text-large text-white">Trust signals</h4>
+                </CardHeader>
+                <CardBody className="overflow-visible py-4">
+                  <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                    {(result.trust_signals || []).map((signal) => (
+                      <li key={`${signal.signal}-${signal.source_url}`}>
+                        {signal.signal}
+                      </li>
+                    ))}
+                    {(result.trust_signals || []).length === 0 ? (
+                      <li>No trust signals found.</li>
+                    ) : null}
+                  </ul>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                  <p className="text-tiny uppercase font-bold text-warning/80">Risks</p>
+                  <h4 className="font-bold text-large text-white">Risks & gaps</h4>
+                </CardHeader>
+                <CardBody className="overflow-visible py-4">
+                  <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                    {(result.risks_gaps || []).map((risk) => (
+                      <li key={risk}>{risk}</li>
+                    ))}
+                    {(result.risks_gaps || []).length === 0 ? (
+                      <li>No risks captured.</li>
+                    ) : null}
+                  </ul>
+                </CardBody>
+              </Card>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Button
+                size="lg"
+                color="warning"
+                variant="shadow"
+                className="font-bold rounded-none px-12 tracking-widest"
+                onPress={downloadPdf}
+              >
+                DOWNLOAD PDF
+              </Button>
+            </div>
+          </section>
+        ) : null}
 
         {/* Pick a Goal */}
         <section className="w-full">
@@ -527,7 +1011,7 @@ export default function IndexPage() {
       </main>
 
       <footer className="absolute bottom-4 z-10 text-[10px] text-white/10 font-mono tracking-[0.5em]">
-        VENCAT SCRAPR
+        VENCAT WEB FLAYER
       </footer>
     </div>
   );
