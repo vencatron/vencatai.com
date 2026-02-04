@@ -134,6 +134,7 @@ export default function IndexPage() {
   const [progress, setProgress] = useState<{ completed: number; total: number } | null>(
     null,
   );
+  const [uiProgress, setUiProgress] = useState(0);
 
   const isBusy = status === "starting" || status === "crawling" || status === "extracting";
 
@@ -144,6 +145,12 @@ export default function IndexPage() {
     return Math.min(100, Math.round((progress.completed / progress.total) * 100));
   }, [progress]);
 
+  const displayPercent = useMemo(() => {
+    if (!isBusy) return null;
+    const actual = progressPercent ?? 0;
+    return Math.min(99, Math.max(uiProgress, actual));
+  }, [isBusy, progressPercent, uiProgress]);
+
   const statusLabel = useMemo(() => {
     if (status === "starting") return "Starting crawl...";
     if (status === "crawling") return "Crawling pages...";
@@ -152,6 +159,33 @@ export default function IndexPage() {
     if (status === "error") return "Something went wrong.";
     return "Ready.";
   }, [status]);
+
+  useEffect(() => {
+    if (!isBusy) return;
+
+    const tickMs = 450;
+    const timer = window.setInterval(() => {
+      setUiProgress((current) => {
+        const actual = progressPercent ?? 0;
+        let next = Math.max(current, actual);
+        const cap =
+          status === "extracting" ? 99 : status === "crawling" ? 93 : 18;
+
+        if (next < cap) {
+          const remaining = cap - next;
+          const delta =
+            status === "starting"
+              ? Math.min(4, remaining)
+              : Math.max(0.2, remaining / (status === "extracting" ? 18 : 35));
+          next = Math.min(cap, next + delta);
+        }
+
+        return Math.round(next * 10) / 10;
+      });
+    }, tickMs);
+
+    return () => window.clearInterval(timer);
+  }, [isBusy, progressPercent, status]);
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -217,6 +251,7 @@ export default function IndexPage() {
     setResult(null);
     setPagesUsed(null);
     setProgress(null);
+    setUiProgress(2);
     setStatus("starting");
 
     try {
@@ -431,13 +466,11 @@ export default function IndexPage() {
               className={[
                 "h-full",
                 status === "extracting" ? "bg-primary/80" : "bg-warning/80",
-                progressPercent === null ? "animate-pulse w-1/3" : "transition-all duration-500",
+                "transition-[width] duration-500 ease-out",
               ].join(" ")}
-              style={
-                progressPercent === null
-                  ? undefined
-                  : { width: status === "extracting" ? "100%" : `${progressPercent}%` }
-              }
+              style={{
+                width: `${Math.max(8, displayPercent ?? 8)}%`,
+              }}
             />
           </div>
           <div className="px-4 py-2 bg-black/50 border-b border-white/10 backdrop-blur-md">
@@ -585,24 +618,14 @@ export default function IndexPage() {
                     {progress.completed}/{progress.total || "?"} pages
                   </span>
                   <span>
-                    {progress.total
-                      ? `${Math.min(
-                          100,
-                          Math.round((progress.completed / progress.total) * 100),
-                        )}%`
-                      : "Calculating"}
+                    {displayPercent !== null ? `${Math.round(displayPercent)}%` : "Calculating"}
                   </span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full bg-warning/70 transition-all duration-500"
+                    className="h-full bg-warning/70 transition-[width] duration-500 ease-out"
                     style={{
-                      width: progress.total
-                        ? `${Math.min(
-                            100,
-                            Math.round((progress.completed / progress.total) * 100),
-                          )}%`
-                        : "12%",
+                      width: `${Math.max(8, displayPercent ?? 8)}%`,
                     }}
                   />
                 </div>
@@ -643,11 +666,9 @@ export default function IndexPage() {
                           : "Starting"}
                     </span>
                     <span>
-                      {progressPercent !== null && status === "crawling"
-                        ? `${progressPercent}%`
-                        : status === "extracting"
-                          ? "Almost there"
-                          : "Calculating"}
+                      {displayPercent !== null
+                        ? `${Math.round(displayPercent)}%`
+                        : "Working"}
                     </span>
                   </div>
                   <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
@@ -655,13 +676,9 @@ export default function IndexPage() {
                       className={[
                         "h-full",
                         status === "extracting" ? "bg-primary/70" : "bg-warning/70",
-                        progressPercent === null ? "animate-pulse w-1/3" : "transition-all duration-500",
+                        "transition-[width] duration-500 ease-out",
                       ].join(" ")}
-                      style={
-                        progressPercent === null
-                          ? undefined
-                          : { width: status === "extracting" ? "100%" : `${progressPercent}%` }
-                      }
+                      style={{ width: `${Math.max(8, displayPercent ?? 8)}%` }}
                     />
                   </div>
                 </div>
