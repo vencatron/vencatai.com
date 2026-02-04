@@ -195,11 +195,20 @@ export default function IndexPage() {
         body: JSON.stringify({ url: targetUrl, goal, mode }),
       });
       const { data, rawText } = await readResponseBody(response);
-      if (!response.ok || !data?.jobId) {
+      if (!response.ok) {
         if (rawText) {
           throw new Error(`API error: ${rawText.slice(0, 200)}`);
         }
         throw new Error(formatApiError(data, "Unable to start crawl."));
+      }
+      if (data?.result) {
+        setResult(data.result);
+        setPagesUsed(data?.meta?.pages_used ?? null);
+        setStatus("done");
+        return;
+      }
+      if (!data?.jobId) {
+        throw new Error("No crawl job returned.");
       }
       setStatus("crawling");
       pollStatus(data.jobId, 0);
