@@ -275,6 +275,10 @@ export default async function handler(req: any, res: any) {
     typeof req.query?.goal === "string" && req.query.goal.trim().length > 0
       ? req.query.goal.trim()
       : "Competitor Snapshot";
+  const extract =
+    req.query?.extract === "1" ||
+    req.query?.extract === "true" ||
+    req.query?.extract === "yes";
 
   const statusResponse = await fetchFirecrawlStatus(id, firecrawlKey);
   if (!statusResponse.ok) {
@@ -287,6 +291,16 @@ export default async function handler(req: any, res: any) {
       status: statusResponse.data?.status || "processing",
       completed: statusResponse.data?.completed ?? 0,
       total: statusResponse.data?.total ?? 0,
+    });
+    return;
+  }
+
+  if (!extract) {
+    res.status(200).json({
+      status: "completed",
+      completed: statusResponse.data?.completed ?? statusResponse.data?.total ?? 0,
+      total: statusResponse.data?.total ?? 0,
+      ready: true,
     });
     return;
   }

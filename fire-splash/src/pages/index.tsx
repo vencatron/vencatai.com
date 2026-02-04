@@ -131,6 +131,9 @@ export default function IndexPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<FlayResult | null>(null);
   const [pagesUsed, setPagesUsed] = useState<number | null>(null);
+  const [progress, setProgress] = useState<{ completed: number; total: number } | null>(
+    null,
+  );
 
   const isBusy = status === "starting" || status === "crawling" || status === "extracting";
 
@@ -182,6 +185,7 @@ export default function IndexPage() {
     setError(null);
     setResult(null);
     setPagesUsed(null);
+    setProgress(null);
     setStatus("starting");
 
     try {
@@ -205,6 +209,23 @@ export default function IndexPage() {
     }
   };
 
+  const fetchExtraction = async (id: string) => {
+    const response = await fetch(
+      `/api/flay/${id}?extract=1&mode=${mode}&goal=${encodeURIComponent(goal)}`,
+    );
+    const { data, rawText } = await readResponseBody(response);
+    if (!response.ok) {
+      if (rawText) {
+        throw new Error(`API error: ${rawText.slice(0, 200)}`);
+      }
+      throw new Error(formatApiError(data, "Extraction failed."));
+    }
+    if (!data?.result) {
+      throw new Error("No result returned.");
+    }
+    return data;
+  };
+
   const pollStatus = async (id: string, attempt: number) => {
     try {
       const response = await fetch(
@@ -223,6 +244,9 @@ export default function IndexPage() {
           throw new Error("Crawl failed.");
         }
         setStatus("crawling");
+        if (typeof data?.completed === "number" && typeof data?.total === "number") {
+          setProgress({ completed: data.completed, total: data.total });
+        }
         if (attempt < 60) {
           setTimeout(() => pollStatus(id, attempt + 1), 2500);
         } else {
@@ -232,14 +256,14 @@ export default function IndexPage() {
       }
 
       if (data?.status === "completed") {
-        setStatus("extracting");
-        if (data?.result) {
-          setResult(data.result);
-          setPagesUsed(data?.meta?.pages_used ?? null);
-          setStatus("done");
-        } else {
-          throw new Error("No result returned.");
+        if (typeof data?.completed === "number" && typeof data?.total === "number") {
+          setProgress({ completed: data.completed, total: data.total });
         }
+        setStatus("extracting");
+        const extraction = await fetchExtraction(id);
+        setResult(extraction.result);
+        setPagesUsed(extraction?.meta?.pages_used ?? null);
+        setStatus("done");
       }
     } catch (err: any) {
       setError(err?.message || "Unable to fetch result.");
@@ -481,6 +505,36 @@ export default function IndexPage() {
               {statusLabel}
               {pagesUsed ? ` (${pagesUsed} pages)` : ""}
             </p>
+            {progress ? (
+              <div className="w-full max-w-md">
+                <div className="flex items-center justify-between text-[10px] text-white/40 font-mono uppercase tracking-widest mb-2">
+                  <span>
+                    {progress.completed}/{progress.total || "?"} pages
+                  </span>
+                  <span>
+                    {progress.total
+                      ? `${Math.min(
+                          100,
+                          Math.round((progress.completed / progress.total) * 100),
+                        )}%`
+                      : "Calculating"}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full bg-warning/70 transition-all duration-500"
+                    style={{
+                      width: progress.total
+                        ? `${Math.min(
+                            100,
+                            Math.round((progress.completed / progress.total) * 100),
+                          )}%`
+                        : "12%",
+                    }}
+                  />
+                </div>
+              </div>
+            ) : null}
             {error ? (
               <p className="text-xs text-danger-400 font-mono tracking-[0.2em] uppercase">
                 {error}
