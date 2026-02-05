@@ -94,7 +94,7 @@ const GOALS = [
 ] as const;
 
 const MODES = [
-  { label: "Executive", value: "executive" },
+  { label: "Executive Summary", value: "executive" },
   { label: "Deep Research", value: "thorough" },
 ] as const;
 
