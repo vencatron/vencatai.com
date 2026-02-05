@@ -675,9 +675,11 @@ export default function IndexPage() {
                     <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">
                       Step 2
                     </p>
-                    <p className="text-sm text-white/80 font-semibold">Extract meaning</p>
+                    <p className="text-sm text-white/80 font-semibold">
+                      Choose Executive Summary
+                    </p>
                     <p className="text-xs text-white/40 mt-2">
-                      Claude turns messy pages into structured facts with citations.
+                      Select Executive Summary and hit Generate Brief.
                     </p>
                   </div>
                   <div className="rounded-lg border border-white/10 bg-black/40 p-4">
