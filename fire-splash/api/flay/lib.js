@@ -2,44 +2,23 @@ export const FIRECRAWL_BASE = "https://api.firecrawl.dev/v2";
 export const CLAUDE_ENDPOINT = "https://api.anthropic.com/v1/messages";
 export const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 
-export type FlayMode = "executive" | "thorough";
-
-export type SourceChunk = {
-  url: string;
-  title: string;
-  content: string;
-};
-
-export type CrawlPage = {
-  markdown?: string;
-  html?: string;
-  metadata?: {
-    title?: string;
-    sourceURL?: string;
-    url?: string;
-  };
-  url?: string;
-};
-
-export type FetchLike = (input: string, init?: any) => Promise<any>;
-
-export function sendJson(res: any, statusCode: number, body: any) {
+export function sendJson(res, statusCode, body) {
   res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.end(JSON.stringify(body));
 }
 
-export function sendError(res: any, statusCode: number, error: string, detail?: any) {
+export function sendError(res, statusCode, error, detail) {
   sendJson(res, statusCode, { error, detail });
 }
 
-export async function getFetchFn(): Promise<FetchLike> {
-  if (typeof fetch === "function") return fetch as FetchLike;
+export async function getFetchFn() {
+  if (typeof fetch === "function") return fetch;
   const undici = await import("undici");
-  return undici.fetch as unknown as FetchLike;
+  return undici.fetch;
 }
 
-export async function safeReadJson(response: { text: () => Promise<string> }) {
+export async function safeReadJson(response) {
   const text = await response.text();
   try {
     return JSON.parse(text);
@@ -48,7 +27,7 @@ export async function safeReadJson(response: { text: () => Promise<string> }) {
   }
 }
 
-export function safeJsonParse(text: string) {
+export function safeJsonParse(text) {
   try {
     return JSON.parse(text);
   } catch {
@@ -63,20 +42,20 @@ export function safeJsonParse(text: string) {
   }
 }
 
-export function trimContent(content: string, maxChars: number) {
+export function trimContent(content, maxChars) {
   const compact = content.replace(/\s+/g, " ").trim();
   if (compact.length <= maxChars) return compact;
   return `${compact.slice(0, maxChars)}...`;
 }
 
-export function normalizeUrlInput(value: string) {
+export function normalizeUrlInput(value) {
   const trimmed = value.trim();
   if (!trimmed) return "";
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 }
 
-export function isValidHttpUrl(value: string) {
+export function isValidHttpUrl(value) {
   try {
     const url = new URL(value);
     return url.protocol === "http:" || url.protocol === "https:";
@@ -85,15 +64,7 @@ export function isValidHttpUrl(value: string) {
   }
 }
 
-export function buildPrompt({
-  goal,
-  mode,
-  sources,
-}: {
-  goal: string;
-  mode: FlayMode;
-  sources: SourceChunk[];
-}) {
+export function buildPrompt({ goal, mode, sources }) {
   const limits =
     mode === "thorough"
       ? {
@@ -207,12 +178,6 @@ export async function callClaude({
   model,
   apiKey,
   fetchFn,
-}: {
-  prompt: string;
-  maxTokens: number;
-  model: string;
-  apiKey: string;
-  fetchFn: FetchLike;
 }) {
   const response = await fetchFn(CLAUDE_ENDPOINT, {
     method: "POST",
@@ -229,39 +194,34 @@ export async function callClaude({
     }),
   });
 
-  const data = await safeReadJson(response as unknown as { text: () => Promise<string> });
-  if (!(response as any).ok) {
-    return { ok: false as const, data };
+  const data = await safeReadJson(response);
+  if (!response.ok) {
+    return { ok: false, data };
   }
 
-  const text = Array.isArray((data as any)?.content)
-    ? (data as any).content
-        .map((item: any) => (typeof item?.text === "string" ? item.text : ""))
+  const text = Array.isArray(data?.content)
+    ? data.content
+        .map((item) => (typeof item?.text === "string" ? item.text : ""))
         .join("\n")
         .trim()
     : "";
 
-  return { ok: true as const, data: { text } };
+  return { ok: true, data: { text } };
 }
 
-export function isString(value: unknown): value is string {
+export function isString(value) {
   return typeof value === "string";
 }
 
-export function normalizeUrl(page: CrawlPage) {
-  return (
-    page?.metadata?.sourceURL ||
-    page?.metadata?.url ||
-    page?.url ||
-    "Unknown URL"
-  );
+export function normalizeUrl(page) {
+  return page?.metadata?.sourceURL || page?.metadata?.url || page?.url || "Unknown URL";
 }
 
-export function normalizeTitle(page: CrawlPage) {
+export function normalizeTitle(page) {
   return page?.metadata?.title || "";
 }
 
-export function scoreUrl(url: string) {
+export function scoreUrl(url) {
   const rules = [
     { pattern: /pricing|price|plans|plan/i, weight: 4 },
     { pattern: /faq|support|help|docs|documentation/i, weight: 3 },
@@ -279,17 +239,17 @@ export function scoreUrl(url: string) {
   }, 0);
 }
 
-export function parseQuery(req: any) {
+export function parseQuery(req) {
   if (req?.query && typeof req.query === "object") return req.query;
   const url = new URL(req?.url || "/", "http://localhost");
-  const query: Record<string, string> = {};
+  const query = {};
   url.searchParams.forEach((value, key) => {
     query[key] = value;
   });
   return query;
 }
 
-export function getId(req: any) {
+export function getId(req) {
   const query = parseQuery(req);
   if (typeof query.id === "string" && query.id) return query.id;
 

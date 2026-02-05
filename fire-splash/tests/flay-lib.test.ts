@@ -9,7 +9,7 @@ import {
   safeReadJson,
   scoreUrl,
   trimContent,
-} from "../api/flay/lib";
+} from "../api/flay/lib.js";
 
 describe("flay lib", () => {
   it("normalizes urls", () => {

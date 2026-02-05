@@ -11,7 +11,7 @@ import {
   sendError,
   sendJson,
   trimContent,
-} from "./lib";
+} from "./lib.js";
 
 async function readRawBody(req: any): Promise<string> {
   if (typeof req?.body === "string") return req.body;

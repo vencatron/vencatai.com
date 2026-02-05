@@ -15,9 +15,20 @@ import {
   sendError,
   sendJson,
   trimContent,
-  type CrawlPage,
-  type FetchLike,
-} from "./lib";
+} from "./lib.js";
+
+type CrawlPage = {
+  markdown?: string;
+  html?: string;
+  metadata?: {
+    title?: string;
+    sourceURL?: string;
+    url?: string;
+  };
+  url?: string;
+};
+
+type FetchLike = (input: string, init?: any) => Promise<any>;
 
 async function fetchFirecrawlStatus(
   id: string,
