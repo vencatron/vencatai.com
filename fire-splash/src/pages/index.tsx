@@ -860,6 +860,26 @@ export default function IndexPage() {
           <p className="text-center text-white/40 text-sm font-mono tracking-wider uppercase mb-5">
             Pick a goal, not a template
           </p>
+          {mode === "thorough" ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+              {[
+                "Site code",
+                "Design aesthetic",
+                "Geo location",
+                "DNS",
+                "Full domain crawl",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="aspect-square rounded-lg border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 text-center"
+                >
+                  <p className="text-[10px] text-white/70 font-mono uppercase tracking-[0.2em]">
+                    {item}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="grid md:grid-cols-3 gap-6 w-full">
             <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
               <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
