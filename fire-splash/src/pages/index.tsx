@@ -131,7 +131,7 @@ type FlayResult = {
 
 export default function IndexPage() {
   const [urlInput, setUrlInput] = useState("");
-  const [goal, setGoal] = useState<(typeof GOALS)[number]>("Competitor Snapshot");
+  const goal = "Full Brief (all categories)";
   const [mode, setMode] = useState<FlayMode>("executive");
   const [status, setStatus] = useState<FlayStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -541,35 +541,24 @@ export default function IndexPage() {
 
           <div className="flex flex-col items-center gap-4 mb-6">
             <div className="flex flex-wrap justify-center gap-2">
-              {GOALS.map((item) => {
-                const isActive = goal === item;
-                return (
-                  <Chip
-                    key={item}
-                    onClick={() => {
-                      if (!isBusy) setGoal(item);
-                    }}
-                    classNames={{
-                      base: [
-                        "border",
-                        "transition-colors",
-                        "cursor-pointer",
-                        isActive
-                          ? "bg-warning/30 border-warning/60"
-                          : "bg-black/40 border-white/10 hover:bg-white/10",
-                      ].join(" "),
-                      content: [
-                        "text-xs font-mono tracking-wider",
-                        isActive ? "text-warning-200" : "text-white/70",
-                      ].join(" "),
-                    }}
-                    size="sm"
-                    variant="bordered"
-                  >
-                    {item}
-                  </Chip>
-                );
-              })}
+              {GOALS.map((item) => (
+                <Chip
+                  key={item}
+                  classNames={{
+                    base: [
+                      "border",
+                      "transition-colors",
+                      "cursor-default",
+                      "bg-warning/20 border-warning/40",
+                    ].join(" "),
+                    content: ["text-xs font-mono tracking-wider", "text-warning-200"].join(" "),
+                  }}
+                  size="sm"
+                  variant="bordered"
+                >
+                  {item}
+                </Chip>
+              ))}
             </div>
 
             <div className="flex items-center gap-2">
