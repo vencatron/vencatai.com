@@ -860,7 +860,7 @@ export default function IndexPage() {
         {/* Pick a Goal */}
         <section className="w-full">
           <p className="text-center text-white/40 text-sm font-mono tracking-wider uppercase mb-5">
-            Executive summary includes valuable insight in all the areas below
+            All core insights are included in the executive summary
           </p>
           {mode === "thorough" ? (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
