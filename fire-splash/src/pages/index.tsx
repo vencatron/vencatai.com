@@ -95,7 +95,7 @@ const GOALS = [
 
 const MODES = [
   { label: "Executive", value: "executive" },
-  { label: "Deep Research (Subscribers Only)", value: "thorough", disabled: true },
+  { label: "Deep Research", value: "thorough" },
 ] as const;
 
 type FlayMode = (typeof MODES)[number]["value"];
@@ -570,12 +570,12 @@ export default function IndexPage() {
                     size="sm"
                     variant={isActive ? "shadow" : "bordered"}
                     color={isActive ? "warning" : "default"}
-                    className="rounded-none tracking-widest uppercase"
-                    onPress={() => {
-                      if (item.disabled) return;
-                      setMode(item.value);
-                    }}
-                    isDisabled={isBusy || item.disabled}
+                    className={[
+                      "rounded-none tracking-widest uppercase",
+                      isActive ? "" : "text-white border-white/40 hover:border-white/70",
+                    ].join(" ")}
+                    onPress={() => setMode(item.value)}
+                    isDisabled={isBusy}
                   >
                     {item.label}
                   </Button>
