@@ -6,6 +6,13 @@ import { Divider } from "@heroui/divider";
 import { Input } from "@heroui/input";
 import { jsPDF } from "jspdf";
 import { DoomFire } from "@/components/DoomFire";
+import {
+  getDisplayPercent,
+  getProgressPercent,
+  getStatusLabel,
+  nextOptimisticProgress,
+} from "@/utils/progress";
+import type { FlayStatus, ProgressState } from "@/utils/progress";
 
 // Globe icon for URL input
 const GlobeIcon = () => (
@@ -92,7 +99,6 @@ const MODES = [
 ] as const;
 
 type FlayMode = (typeof MODES)[number]["value"];
-type FlayStatus = "idle" | "starting" | "crawling" | "extracting" | "done" | "error";
 
 type FlayResult = {
   title?: string;
@@ -131,57 +137,37 @@ export default function IndexPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<FlayResult | null>(null);
   const [pagesUsed, setPagesUsed] = useState<number | null>(null);
-  const [progress, setProgress] = useState<{ completed: number; total: number } | null>(
-    null,
-  );
+  const [progress, setProgress] = useState<ProgressState>(null);
   const [uiProgress, setUiProgress] = useState(0);
 
   const isBusy = status === "starting" || status === "crawling" || status === "extracting";
 
-  const progressPercent = useMemo(() => {
-    if (!progress) return null;
-    if (!progress.total) return null;
-    if (progress.total <= 0) return null;
-    return Math.min(100, Math.round((progress.completed / progress.total) * 100));
-  }, [progress]);
+  const progressPercent = useMemo(() => getProgressPercent(progress), [progress]);
 
-  const displayPercent = useMemo(() => {
-    if (!isBusy) return null;
-    const actual = progressPercent ?? 0;
-    return Math.min(99, Math.max(uiProgress, actual));
-  }, [isBusy, progressPercent, uiProgress]);
+  const displayPercent = useMemo(
+    () =>
+      getDisplayPercent({
+        isBusy,
+        progressPercent,
+        uiProgress,
+      }),
+    [isBusy, progressPercent, uiProgress],
+  );
 
-  const statusLabel = useMemo(() => {
-    if (status === "starting") return "Starting crawl...";
-    if (status === "crawling") return "Crawling pages...";
-    if (status === "extracting") return "Extracting the brief...";
-    if (status === "done") return "Brief ready.";
-    if (status === "error") return "Something went wrong.";
-    return "Ready.";
-  }, [status]);
+  const statusLabel = useMemo(() => getStatusLabel(status), [status]);
 
   useEffect(() => {
     if (!isBusy) return;
 
     const tickMs = 450;
     const timer = window.setInterval(() => {
-      setUiProgress((current) => {
-        const actual = progressPercent ?? 0;
-        let next = Math.max(current, actual);
-        const cap =
-          status === "extracting" ? 99 : status === "crawling" ? 93 : 18;
-
-        if (next < cap) {
-          const remaining = cap - next;
-          const delta =
-            status === "starting"
-              ? Math.min(4, remaining)
-              : Math.max(0.2, remaining / (status === "extracting" ? 18 : 35));
-          next = Math.min(cap, next + delta);
-        }
-
-        return Math.round(next * 10) / 10;
-      });
+      setUiProgress((current) =>
+        nextOptimisticProgress({
+          current,
+          actual: progressPercent,
+          status,
+        }),
+      );
     }, tickMs);
 
     return () => window.clearInterval(timer);
