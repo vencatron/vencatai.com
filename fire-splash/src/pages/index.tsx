@@ -1127,11 +1127,11 @@ export default function IndexPage() {
           <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
             <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
               <p className="text-tiny uppercase font-bold text-success/80">Step 2</p>
-              <h4 className="font-bold text-large text-white">Choose a goal</h4>
+              <h4 className="font-bold text-large text-white">Choose Executive Summary</h4>
             </CardHeader>
             <CardBody className="overflow-visible py-4">
               <p className="text-default-400 text-sm">
-                Pick a brief: pricing, competitor, FAQ, trust signals, or press kit.
+                Select Executive Summary and hit Generate Brief.
               </p>
             </CardBody>
           </Card>
