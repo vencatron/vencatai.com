@@ -858,7 +858,7 @@ export default function IndexPage() {
         {/* Pick a Goal */}
         <section className="w-full">
           <p className="text-center text-white/40 text-sm font-mono tracking-wider uppercase mb-5">
-            Pick a goal, not a template
+            Executive summary includes valuable insight in all the areas below
           </p>
           {mode === "thorough" ? (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
