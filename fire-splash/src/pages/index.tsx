@@ -93,13 +93,6 @@ const GOALS = [
   "Press Kit",
 ] as const;
 
-const MODES = [
-  { label: "Executive Summary", value: "executive" },
-  { label: "Deep Research", value: "thorough" },
-] as const;
-
-type FlayMode = (typeof MODES)[number]["value"];
-
 type FlayResult = {
   title?: string;
   one_liner?: string;
@@ -125,6 +118,13 @@ type FlayResult = {
     evidence: string;
   }[];
   trust_signals?: { signal: string; source_url: string; evidence: string }[];
+  entities?: {
+    name: string;
+    type: string;
+    relevance: string;
+    source_url: string;
+    evidence: string;
+  }[];
   risks_gaps?: string[];
   sources?: { url: string; title?: string }[];
 };
@@ -132,7 +132,6 @@ type FlayResult = {
 export default function IndexPage() {
   const [urlInput, setUrlInput] = useState("");
   const goal = "Full Brief (all categories)";
-  const [mode, setMode] = useState<FlayMode>("executive");
   const [status, setStatus] = useState<FlayStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<FlayResult | null>(null);
@@ -221,6 +220,30 @@ export default function IndexPage() {
     return { data: null, rawText: text };
   };
 
+  const fetchWithTimeout = async (
+    input: RequestInfo | URL,
+    init: RequestInit | undefined,
+    timeoutMs: number,
+    timeoutMessage: string,
+  ) => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      return await fetch(input, {
+        ...(init || {}),
+        signal: controller.signal,
+      });
+    } catch (error: any) {
+      if (error?.name === "AbortError") {
+        throw new Error(timeoutMessage);
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timer);
+    }
+  };
+
   const startFlay = async (overrideUrl?: string | null) => {
     const safeOverride = typeof overrideUrl === "string" ? overrideUrl : null;
     let targetUrl = safeOverride ? safeOverride.trim() : urlInput.trim();
@@ -241,11 +264,16 @@ export default function IndexPage() {
     setStatus("starting");
 
     try {
-      const response = await fetch("/api/flay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: targetUrl, goal, mode }),
-      });
+      const response = await fetchWithTimeout(
+        "/api/flay",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: targetUrl, goal }),
+        },
+        30000,
+        "Start request timed out. Please try again.",
+      );
       const { data, rawText } = await readResponseBody(response);
       if (!response.ok) {
         if (rawText) {
@@ -271,8 +299,11 @@ export default function IndexPage() {
   };
 
   const fetchExtraction = async (id: string) => {
-    const response = await fetch(
-      `/api/flay/${id}?extract=1&mode=${mode}&goal=${encodeURIComponent(goal)}`,
+    const response = await fetchWithTimeout(
+      `/api/flay/${id}?extract=1&goal=${encodeURIComponent(goal)}`,
+      undefined,
+      240000,
+      "Extraction timed out after 4 minutes. Please retry.",
     );
     const { data, rawText } = await readResponseBody(response);
     if (!response.ok) {
@@ -289,8 +320,11 @@ export default function IndexPage() {
 
   const pollStatus = async (id: string, attempt: number) => {
     try {
-      const response = await fetch(
-        `/api/flay/${id}?mode=${mode}&goal=${encodeURIComponent(goal)}`,
+      const response = await fetchWithTimeout(
+        `/api/flay/${id}?goal=${encodeURIComponent(goal)}`,
+        undefined,
+        30000,
+        "Status check timed out. Retrying may help.",
       );
       const { data, rawText } = await readResponseBody(response);
       if (!response.ok) {
@@ -308,7 +342,7 @@ export default function IndexPage() {
         if (typeof data?.completed === "number" && typeof data?.total === "number") {
           setProgress({ completed: data.completed, total: data.total });
         }
-        if (attempt < 60) {
+        if (attempt < 180) {
           setTimeout(() => pollStatus(id, attempt + 1), 2500);
         } else {
           throw new Error("Crawl timed out.");
@@ -425,6 +459,15 @@ export default function IndexPage() {
     if (result.trust_signals?.length) {
       addSubheading("Trust Signals");
       addList(result.trust_signals.map((signal) => signal.signal));
+    }
+
+    if (result.entities?.length) {
+      addSubheading("Entities");
+      addList(
+        result.entities.map(
+          (entity) => `${entity.name} (${entity.type}): ${entity.relevance}`,
+        ),
+      );
     }
 
     if (result.risks_gaps?.length) {
@@ -561,27 +604,9 @@ export default function IndexPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
-              {MODES.map((item) => {
-                const isActive = mode === item.value;
-                return (
-                  <Button
-                    key={item.value}
-                    size="sm"
-                    variant={isActive ? "shadow" : "bordered"}
-                    color={isActive ? "warning" : "default"}
-                    className={[
-                      "rounded-none tracking-widest uppercase",
-                      isActive ? "" : "text-white border-white/40 hover:border-white/70",
-                    ].join(" ")}
-                    onPress={() => setMode(item.value)}
-                    isDisabled={isBusy}
-                  >
-                    {item.label}
-                  </Button>
-                );
-              })}
-            </div>
+            <p className="text-[11px] text-warning-200 font-mono tracking-[0.2em] uppercase">
+              Executive brief mode is always on
+            </p>
           </div>
 
           <div className="flex flex-col items-center gap-2 mb-8">
@@ -675,11 +700,9 @@ export default function IndexPage() {
                     <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-1">
                       Step 2
                     </p>
-                    <p className="text-sm text-white/80 font-semibold">
-                      Choose Executive Summary
-                    </p>
+                    <p className="text-sm text-white/80 font-semibold">Generate the brief</p>
                     <p className="text-xs text-white/40 mt-2">
-                      Select Executive Summary and hit Generate Brief.
+                      We prioritize the strongest executive summary automatically.
                     </p>
                   </div>
                   <div className="rounded-lg border border-white/10 bg-black/40 p-4">
@@ -734,7 +757,14 @@ export default function IndexPage() {
                     <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
                       {(result.key_facts || []).map((fact) => (
                         <li key={`${fact.label}-${fact.value}`}>
-                          {fact.label}: {fact.value}
+                          <p>
+                            {fact.label}: {fact.value}
+                          </p>
+                          {fact.evidence ? (
+                            <p className="text-xs text-white/50 mt-1">
+                              Evidence: "{fact.evidence}"
+                            </p>
+                          ) : null}
                         </li>
                       ))}
                       {(result.key_facts || []).length === 0 ? (
@@ -755,7 +785,14 @@ export default function IndexPage() {
                     <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
                       {(result.pricing_offers || []).map((offer) => (
                         <li key={`${offer.plan}-${offer.price}`}>
-                          {offer.plan}: {offer.price} {offer.notes || ""}
+                          <p>
+                            {offer.plan}: {offer.price} {offer.notes || ""}
+                          </p>
+                          {offer.evidence ? (
+                            <p className="text-xs text-white/50 mt-1">
+                              Evidence: "{offer.evidence}"
+                            </p>
+                          ) : null}
                         </li>
                       ))}
                       {(result.pricing_offers || []).length === 0 ? (
@@ -774,7 +811,14 @@ export default function IndexPage() {
                     <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
                       {(result.claims_proof || []).map((claim) => (
                         <li key={`${claim.claim}-${claim.proof}`}>
-                          {claim.claim} ({claim.proof})
+                          <p>
+                            {claim.claim} ({claim.proof})
+                          </p>
+                          {claim.evidence ? (
+                            <p className="text-xs text-white/50 mt-1">
+                              Evidence: "{claim.evidence}"
+                            </p>
+                          ) : null}
                         </li>
                       ))}
                       {(result.claims_proof || []).length === 0 ? (
@@ -786,7 +830,7 @@ export default function IndexPage() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 w-full mt-6">
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-6">
               <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
                 <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
                   <p className="text-tiny uppercase font-bold text-success/80">FAQ</p>
@@ -796,7 +840,14 @@ export default function IndexPage() {
                   <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
                     {(result.faqs_policies || []).map((faq) => (
                       <li key={`${faq.question}-${faq.answer}`}>
-                        {faq.question}: {faq.answer}
+                        <p>
+                          {faq.question}: {faq.answer}
+                        </p>
+                        {faq.evidence ? (
+                          <p className="text-xs text-white/50 mt-1">
+                            Evidence: "{faq.evidence}"
+                          </p>
+                        ) : null}
                       </li>
                     ))}
                     {(result.faqs_policies || []).length === 0 ? (
@@ -815,11 +866,42 @@ export default function IndexPage() {
                   <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
                     {(result.trust_signals || []).map((signal) => (
                       <li key={`${signal.signal}-${signal.source_url}`}>
-                        {signal.signal}
+                        <p>{signal.signal}</p>
+                        {signal.evidence ? (
+                          <p className="text-xs text-white/50 mt-1">
+                            Evidence: "{signal.evidence}"
+                          </p>
+                        ) : null}
                       </li>
                     ))}
                     {(result.trust_signals || []).length === 0 ? (
                       <li>No trust signals found.</li>
+                    ) : null}
+                  </ul>
+                </CardBody>
+              </Card>
+
+              <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
+                <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                  <p className="text-tiny uppercase font-bold text-success/80">Entities</p>
+                  <h4 className="font-bold text-large text-white">People, products, brands</h4>
+                </CardHeader>
+                <CardBody className="overflow-visible py-4">
+                  <ul className="text-default-400 text-sm list-disc list-inside space-y-2">
+                    {(result.entities || []).map((entity) => (
+                      <li key={`${entity.name}-${entity.type}`}>
+                        <p>
+                          {entity.name} ({entity.type}): {entity.relevance}
+                        </p>
+                        {entity.evidence ? (
+                          <p className="text-xs text-white/50 mt-1">
+                            Evidence: "{entity.evidence}"
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                    {(result.entities || []).length === 0 ? (
+                      <li>No entities captured.</li>
                     ) : null}
                   </ul>
                 </CardBody>
@@ -854,6 +936,7 @@ export default function IndexPage() {
                 DOWNLOAD PDF
               </Button>
             </div>
+
           </section>
         ) : null}
 
@@ -862,26 +945,24 @@ export default function IndexPage() {
           <p className="text-center text-white/40 text-sm font-mono tracking-wider uppercase mb-5">
             All core insights are included in the executive summary
           </p>
-          {mode === "thorough" ? (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-              {[
-                "Site code",
-                "Design aesthetic",
-                "Geo location",
-                "DNS",
-                "Full domain crawl",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="aspect-square rounded-lg border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 text-center"
-                >
-                  <p className="text-[10px] text-white/70 font-mono uppercase tracking-[0.2em]">
-                    {item}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            {[
+              "Key pages",
+              "Pricing changes",
+              "FAQ + policy",
+              "Trust proof",
+              "Full domain scan",
+            ].map((item) => (
+              <div
+                key={item}
+                className="aspect-square rounded-lg border border-white/10 bg-black/40 backdrop-blur-md flex items-center justify-center p-3 text-center"
+              >
+                <p className="text-[10px] text-white/70 font-mono uppercase tracking-[0.2em]">
+                  {item}
+                </p>
+              </div>
+            ))}
+          </div>
           <div className="grid md:grid-cols-3 gap-6 w-full">
             <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
               <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
@@ -1127,11 +1208,11 @@ export default function IndexPage() {
           <Card className="bg-black/40 border border-white/10 backdrop-blur-md shadow-2xl">
             <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
               <p className="text-tiny uppercase font-bold text-success/80">Step 2</p>
-              <h4 className="font-bold text-large text-white">Choose Executive Summary</h4>
+              <h4 className="font-bold text-large text-white">Generate executive brief</h4>
             </CardHeader>
             <CardBody className="overflow-visible py-4">
               <p className="text-default-400 text-sm">
-                Select Executive Summary and hit Generate Brief.
+                One click starts a full crawl and synthesis into a decision-ready summary.
               </p>
             </CardBody>
           </Card>

@@ -1,16 +1,11 @@
 import {
-  DEFAULT_MODEL,
+  firecrawlRequest,
   FIRECRAWL_BASE,
-  buildPrompt,
-  callClaude,
   getFetchFn,
   isValidHttpUrl,
   normalizeUrlInput,
-  safeJsonParse,
-  safeReadJson,
   sendError,
   sendJson,
-  trimContent,
 } from "./lib.js";
 
 async function readRawBody(req: any): Promise<string> {
@@ -46,6 +41,17 @@ async function readJsonBody(req: any) {
   }
 }
 
+function hasCreditLimitError(detail: any) {
+  const text = JSON.stringify(detail || {}).toLowerCase();
+  return text.includes("insufficient credits") || text.includes("upgrade your plan");
+}
+
+function parsePositiveInt(value: unknown, fallback: number) {
+  if (typeof value !== "string") return fallback;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 export default async function handler(req: any, res: any) {
   try {
     if (req.method !== "POST") {
@@ -56,11 +62,10 @@ export default async function handler(req: any, res: any) {
     const body = await readJsonBody(req);
     const rawUrl = typeof body?.url === "string" ? body.url : "";
     const url = normalizeUrlInput(rawUrl);
-    const mode = body?.mode === "thorough" ? "thorough" : "executive";
     const goal =
       typeof body?.goal === "string" && body.goal.trim().length > 0
         ? body.goal.trim()
-        : "Competitor Snapshot";
+        : "Full Brief (all categories)";
 
     if (!url || !isValidHttpUrl(url)) {
       sendError(res, 400, "Please provide a valid URL.");
@@ -69,7 +74,6 @@ export default async function handler(req: any, res: any) {
 
     const firecrawlKey = process.env.FIRECRAWL_API_KEY;
     const claudeKey = process.env.CLAUDE_API_KEY;
-    const claudeModel = process.env.CLAUDE_MODEL || DEFAULT_MODEL;
     if (!firecrawlKey) {
       sendError(res, 500, "Missing FIRECRAWL_API_KEY.");
       return;
@@ -81,110 +85,77 @@ export default async function handler(req: any, res: any) {
 
     const fetchFn = await getFetchFn();
 
-    if (mode === "executive") {
-      const scrapeResponse = await fetchFn(`${FIRECRAWL_BASE}/scrape`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${firecrawlKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url,
-          formats: ["markdown", "html"],
-          onlyMainContent: true,
-        }),
-      });
-
-      const scrapeData = await safeReadJson(scrapeResponse);
-      if (!scrapeResponse.ok) {
-        sendError(res, 502, "Firecrawl scrape failed.", scrapeData);
-        return;
-      }
-
-      const page: any = (scrapeData as any)?.data ?? scrapeData ?? {};
-      const markdown = typeof page?.markdown === "string" ? page.markdown : "";
-      if (!markdown) {
-        sendError(res, 502, "No content returned from scrape.", scrapeData);
-        return;
-      }
-
-      const sources = [
-        {
-          url: page?.metadata?.sourceURL || page?.metadata?.url || url,
-          title: page?.metadata?.title || "",
-          content: trimContent(markdown, 12000),
-        },
-      ];
-
-      const prompt = buildPrompt({ goal, mode, sources });
-      const claudeResponse = await callClaude({
-        prompt,
-        maxTokens: 1400,
-        model: claudeModel,
-        apiKey: claudeKey,
-        fetchFn,
-      });
-
-      if (!claudeResponse.ok) {
-        sendError(res, 502, "Claude extraction failed.", claudeResponse.data);
-        return;
-      }
-
-      const parsed = safeJsonParse(claudeResponse.data.text);
-      if (!parsed) {
-        sendError(res, 502, "Claude returned invalid JSON.", {
-          raw: claudeResponse.data.text.slice(0, 2000),
-        });
-        return;
-      }
-
-      sendJson(res, 200, {
-        status: "completed",
-        result: parsed,
-        meta: { pages_used: 1, total_pages: 1 },
-      });
-      return;
-    }
-
-    const limit = 100;
-    const maxDiscoveryDepth = 3;
+    const crawlLimit = Number.parseInt(process.env.FLAY_CRAWL_LIMIT || "500", 10);
+    const discoveryDepth = Number.parseInt(process.env.FLAY_MAX_DISCOVERY_DEPTH || "6", 10);
+    const firecrawlTimeoutMs = parsePositiveInt(process.env.FLAY_FIRECRAWL_TIMEOUT_MS, 30000);
+    const firecrawlRetries = parsePositiveInt(process.env.FLAY_FIRECRAWL_RETRIES, 2);
+    const firecrawlRetryDelayMs = parsePositiveInt(process.env.FLAY_FIRECRAWL_RETRY_DELAY_MS, 600);
+    const limit = Number.isFinite(crawlLimit) && crawlLimit > 0 ? crawlLimit : 500;
+    const maxDiscoveryDepth =
+      Number.isFinite(discoveryDepth) && discoveryDepth > 0 ? discoveryDepth : 6;
     const crawlEntireDomain = true;
 
-    const payload = {
-      url,
-      limit,
-      maxDiscoveryDepth,
-      crawlEntireDomain,
-      allowExternalLinks: false,
-      allowSubdomains: false,
-      ignoreQueryParameters: true,
-      sitemap: "include",
-      scrapeOptions: {
-        formats: ["markdown", "html"],
-        onlyMainContent: true,
-      },
-    };
+    const fallbackLimits = [limit, 300, 150, 75].filter(
+      (value, index, all) => value > 0 && all.indexOf(value) === index,
+    );
 
-    const crawlResponse = await fetchFn(`${FIRECRAWL_BASE}/crawl`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${firecrawlKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    let crawlData: any = null;
+    let appliedLimit = limit;
+    let lastFailure: any = null;
 
-    const crawlData = await safeReadJson(crawlResponse);
-    if (!crawlResponse.ok || !(crawlData as any)?.id) {
-      sendError(res, 502, "Firecrawl crawl failed.", crawlData);
+    for (const currentLimit of fallbackLimits) {
+      const payload = {
+        url,
+        limit: currentLimit,
+        maxDiscoveryDepth,
+        crawlEntireDomain,
+        allowExternalLinks: false,
+        allowSubdomains: false,
+        ignoreQueryParameters: true,
+        sitemap: "include",
+        scrapeOptions: {
+          formats: ["markdown", "html"],
+          onlyMainContent: true,
+        },
+      };
+
+      const crawlResponse = await firecrawlRequest({
+        fetchFn,
+        url: `${FIRECRAWL_BASE}/crawl`,
+        apiKey: firecrawlKey,
+        method: "POST",
+        body: payload,
+        timeoutMs: firecrawlTimeoutMs,
+        retries: firecrawlRetries,
+        retryBaseDelayMs: firecrawlRetryDelayMs,
+      });
+      const currentData = crawlResponse.data;
+      if (crawlResponse.ok && (currentData as any)?.id) {
+        crawlData = currentData as any;
+        appliedLimit = currentLimit;
+        break;
+      }
+
+      lastFailure = {
+        status: crawlResponse.status,
+        attempts: crawlResponse.attempts,
+        detail: currentData,
+      };
+      if (!hasCreditLimitError(currentData)) {
+        sendError(res, 502, "Firecrawl crawl failed.", lastFailure);
+        return;
+      }
+    }
+
+    if (!crawlData || !(crawlData as any)?.id) {
+      sendError(res, 502, "Firecrawl crawl failed.", lastFailure);
       return;
     }
 
     sendJson(res, 200, {
       jobId: (crawlData as any).id,
-      mode,
       goal,
-      limit,
+      limit: appliedLimit,
     });
   } catch (error: any) {
     sendError(res, 500, "Unhandled error.", {
