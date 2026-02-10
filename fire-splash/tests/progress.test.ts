@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   getDisplayPercent,
   getProgressPercent,
+  getSimulatedTimer,
   getStatusLabel,
+  getStatusPhaseLabel,
   nextOptimisticProgress,
+  SIMULATED_PROGRESS_DURATION_MS,
 } from "../src/utils/progress";
 
 describe("progress utils", () => {
@@ -15,38 +18,49 @@ describe("progress utils", () => {
   });
 
   it("computes display percent for busy states", () => {
-    expect(
-      getDisplayPercent({ isBusy: false, progressPercent: 50, uiProgress: 10 }),
-    ).toBeNull();
-    expect(
-      getDisplayPercent({ isBusy: true, progressPercent: 20, uiProgress: 10 }),
-    ).toBe(20);
-    expect(
-      getDisplayPercent({ isBusy: true, progressPercent: null, uiProgress: 5 }),
-    ).toBe(5);
-    expect(
-      getDisplayPercent({ isBusy: true, progressPercent: 120, uiProgress: 120 }),
-    ).toBe(99);
+    expect(getDisplayPercent({ isBusy: false, uiProgress: 10 })).toBeNull();
+    expect(getDisplayPercent({ isBusy: true, uiProgress: 5 })).toBe(5);
+    expect(getDisplayPercent({ isBusy: true, uiProgress: 120 })).toBe(99);
+    expect(getDisplayPercent({ isBusy: true, uiProgress: 1 })).toBe(2);
   });
 
-  it("returns human status labels", () => {
-    expect(getStatusLabel("starting")).toBe("Starting crawl...");
-    expect(getStatusLabel("crawling")).toBe("Crawling pages...");
-    expect(getStatusLabel("extracting")).toBe("Extracting the brief...");
+  it("returns human status and phase labels", () => {
+    expect(getStatusLabel("starting", 2)).toBe("Extracting page signals...");
+    expect(getStatusLabel("crawling", 35)).toBe("Analyzing meaning...");
+    expect(getStatusLabel("extracting", 90)).toBe("Finalizing report format...");
     expect(getStatusLabel("done")).toBe("Brief ready.");
     expect(getStatusLabel("error")).toBe("Something went wrong.");
     expect(getStatusLabel("idle")).toBe("Ready.");
+    expect(getStatusPhaseLabel("extracting", 52)).toBe("Phase 4 of 6");
+    expect(getStatusPhaseLabel("done")).toBe("Complete");
   });
 
-  it("advances optimistic progress", () => {
+  it("advances optimistic progress on a 1 minute 45 second timer", () => {
     expect(
-      nextOptimisticProgress({ current: 0, actual: null, status: "starting" }),
-    ).toBe(4);
+      nextOptimisticProgress({ current: 0, startedAtMs: 1000, nowMs: 1000 }),
+    ).toBe(2);
     expect(
-      nextOptimisticProgress({ current: 50, actual: 60, status: "crawling" }),
-    ).toBeCloseTo(60.9, 1);
+      nextOptimisticProgress({
+        current: 40,
+        startedAtMs: 0,
+        nowMs: SIMULATED_PROGRESS_DURATION_MS / 2,
+      }),
+    ).toBeGreaterThan(50);
     expect(
-      nextOptimisticProgress({ current: 98, actual: 99, status: "extracting" }),
+      nextOptimisticProgress({
+        current: 98,
+        startedAtMs: 0,
+        nowMs: SIMULATED_PROGRESS_DURATION_MS,
+      }),
     ).toBe(99);
+    expect(
+      nextOptimisticProgress({ current: 80, startedAtMs: 0, nowMs: 5000 }),
+    ).toBe(80);
+  });
+
+  it("formats simulated timer labels", () => {
+    expect(getSimulatedTimer(0)).toBe("00:00 / 01:45");
+    expect(getSimulatedTimer(SIMULATED_PROGRESS_DURATION_MS)).toBe("01:45 / 01:45");
+    expect(getSimulatedTimer(999999)).toBe("01:45 / 01:45");
   });
 });

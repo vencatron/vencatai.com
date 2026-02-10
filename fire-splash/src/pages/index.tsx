@@ -8,8 +8,9 @@ import { jsPDF } from "jspdf";
 import { DoomFire } from "@/components/DoomFire";
 import {
   getDisplayPercent,
-  getProgressPercent,
+  getSimulatedTimer,
   getStatusLabel,
+  getStatusPhaseLabel,
   nextOptimisticProgress,
 } from "@/utils/progress";
 import type { FlayStatus, ProgressState } from "@/utils/progress";
@@ -138,39 +139,60 @@ export default function IndexPage() {
   const [pagesUsed, setPagesUsed] = useState<number | null>(null);
   const [progress, setProgress] = useState<ProgressState>(null);
   const [uiProgress, setUiProgress] = useState(0);
+  const [busyStartedAtMs, setBusyStartedAtMs] = useState<number | null>(null);
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   const isBusy = status === "starting" || status === "crawling" || status === "extracting";
-
-  const progressPercent = useMemo(() => getProgressPercent(progress), [progress]);
 
   const displayPercent = useMemo(
     () =>
       getDisplayPercent({
         isBusy,
-        progressPercent,
         uiProgress,
       }),
-    [isBusy, progressPercent, uiProgress],
+    [isBusy, uiProgress],
   );
 
-  const statusLabel = useMemo(() => getStatusLabel(status), [status]);
+  const statusLabel = useMemo(() => getStatusLabel(status, displayPercent), [status, displayPercent]);
+  const statusPhaseLabel = useMemo(
+    () => getStatusPhaseLabel(status, displayPercent),
+    [status, displayPercent],
+  );
+  const simulatedTimer = useMemo(() => getSimulatedTimer(elapsedMs), [elapsedMs]);
 
   useEffect(() => {
-    if (!isBusy) return;
+    if (isBusy && busyStartedAtMs === null) {
+      setBusyStartedAtMs(Date.now());
+      setElapsedMs(0);
+    }
 
-    const tickMs = 450;
-    const timer = window.setInterval(() => {
+    if (!isBusy && busyStartedAtMs !== null) {
+      setBusyStartedAtMs(null);
+      setElapsedMs(0);
+    }
+  }, [isBusy, busyStartedAtMs]);
+
+  useEffect(() => {
+    if (!isBusy || busyStartedAtMs === null) return;
+
+    const tickMs = 250;
+    const tick = () => {
+      const nowMs = Date.now();
+      setElapsedMs(nowMs - busyStartedAtMs);
       setUiProgress((current) =>
         nextOptimisticProgress({
           current,
-          actual: progressPercent,
-          status,
+          startedAtMs: busyStartedAtMs,
+          nowMs,
         }),
       );
-    }, tickMs);
+    };
+
+    tick();
+    const timer = window.setInterval(tick, tickMs);
 
     return () => window.clearInterval(timer);
-  }, [isBusy, progressPercent, status]);
+  }, [isBusy, busyStartedAtMs]);
 
   useEffect(() => {
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -261,6 +283,8 @@ export default function IndexPage() {
     setPagesUsed(null);
     setProgress(null);
     setUiProgress(2);
+    setBusyStartedAtMs(Date.now());
+    setElapsedMs(0);
     setStatus("starting");
 
     try {
@@ -509,10 +533,8 @@ export default function IndexPage() {
               </p>
               <p className="text-[10px] text-white/40 font-mono tracking-[0.25em] uppercase">
                 {status === "crawling" && progress
-                  ? `${progress.completed}/${progress.total || "?"} pages`
-                  : status === "extracting"
-                    ? "Generating brief"
-                    : "Working"}
+                  ? `${progress.completed}/${progress.total || "?"} pages | ${simulatedTimer}`
+                  : `${statusPhaseLabel} | ${simulatedTimer}`}
               </p>
             </div>
           </div>
@@ -607,6 +629,10 @@ export default function IndexPage() {
             <p className="text-[11px] text-warning-200 font-mono tracking-[0.2em] uppercase">
               Executive brief mode is always on
             </p>
+            <p className="text-[11px] text-white/60 font-mono tracking-[0.12em] uppercase">
+              Heads up: most runs finish around 1 minute 45 seconds. Progress and phases are
+              simulated so the UI stays active while your brief is generated.
+            </p>
           </div>
 
           <div className="flex flex-col items-center gap-2 mb-8">
@@ -664,13 +690,11 @@ export default function IndexPage() {
                     <span>
                       {status === "crawling" && progress
                         ? `${progress.completed}/${progress.total || "?"} pages`
-                        : status === "extracting"
-                          ? "Generating"
-                          : "Starting"}
+                        : statusPhaseLabel}
                     </span>
                     <span>
                       {displayPercent !== null
-                        ? `${Math.round(displayPercent)}%`
+                        ? `${Math.round(displayPercent)}% | ${simulatedTimer}`
                         : "Working"}
                     </span>
                   </div>
@@ -760,11 +784,6 @@ export default function IndexPage() {
                           <p>
                             {fact.label}: {fact.value}
                           </p>
-                          {fact.evidence ? (
-                            <p className="text-xs text-white/50 mt-1">
-                              Evidence: "{fact.evidence}"
-                            </p>
-                          ) : null}
                         </li>
                       ))}
                       {(result.key_facts || []).length === 0 ? (
@@ -788,11 +807,6 @@ export default function IndexPage() {
                           <p>
                             {offer.plan}: {offer.price} {offer.notes || ""}
                           </p>
-                          {offer.evidence ? (
-                            <p className="text-xs text-white/50 mt-1">
-                              Evidence: "{offer.evidence}"
-                            </p>
-                          ) : null}
                         </li>
                       ))}
                       {(result.pricing_offers || []).length === 0 ? (
@@ -814,11 +828,6 @@ export default function IndexPage() {
                           <p>
                             {claim.claim} ({claim.proof})
                           </p>
-                          {claim.evidence ? (
-                            <p className="text-xs text-white/50 mt-1">
-                              Evidence: "{claim.evidence}"
-                            </p>
-                          ) : null}
                         </li>
                       ))}
                       {(result.claims_proof || []).length === 0 ? (
@@ -843,11 +852,6 @@ export default function IndexPage() {
                         <p>
                           {faq.question}: {faq.answer}
                         </p>
-                        {faq.evidence ? (
-                          <p className="text-xs text-white/50 mt-1">
-                            Evidence: "{faq.evidence}"
-                          </p>
-                        ) : null}
                       </li>
                     ))}
                     {(result.faqs_policies || []).length === 0 ? (
@@ -867,11 +871,6 @@ export default function IndexPage() {
                     {(result.trust_signals || []).map((signal) => (
                       <li key={`${signal.signal}-${signal.source_url}`}>
                         <p>{signal.signal}</p>
-                        {signal.evidence ? (
-                          <p className="text-xs text-white/50 mt-1">
-                            Evidence: "{signal.evidence}"
-                          </p>
-                        ) : null}
                       </li>
                     ))}
                     {(result.trust_signals || []).length === 0 ? (
@@ -893,11 +892,6 @@ export default function IndexPage() {
                         <p>
                           {entity.name} ({entity.type}): {entity.relevance}
                         </p>
-                        {entity.evidence ? (
-                          <p className="text-xs text-white/50 mt-1">
-                            Evidence: "{entity.evidence}"
-                          </p>
-                        ) : null}
                       </li>
                     ))}
                     {(result.entities || []).length === 0 ? (
