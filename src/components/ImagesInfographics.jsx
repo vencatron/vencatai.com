@@ -23,7 +23,7 @@ const images = [
     category: '3D Design',
   },
   {
-    title: 'Data Visualization',
+    title: 'Intricate Labeled Artifact Diagrams',
     image: imgDiagram,
     url: null,
     category: 'Data Viz',
@@ -35,19 +35,19 @@ const images = [
     category: 'Story Infographic',
   },
   {
-    title: 'Original AI Artwork',
+    title: 'Pixelated Retro Artifacts',
     image: imgOrig,
     url: null,
     category: 'Art',
   },
   {
-    title: 'AI Brand Visual',
+    title: 'Parallax Layered Scroll Artifacts',
     image: imgStock,
     url: null,
     category: 'Branding',
   },
   {
-    title: 'AI Icon Design',
+    title: 'Network Topography Diagrams',
     image: imgDownload,
     url: null,
     category: 'Design',
