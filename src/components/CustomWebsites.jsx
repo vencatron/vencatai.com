@@ -1,12 +1,11 @@
 import { Globe, Sparkles } from 'lucide-react';
 import { WebsiteTile } from './Tile';
 
-// TODO: Replace with actual website data
 const websites = [
   {
     title: 'Generation Catalyst',
     description: 'AI-powered estate planning platform that simplifies trust creation and management.',
-    thumbnail: null, // Add screenshot URL
+    thumbnail: '/screenshots/iamatrust.png',
     url: 'https://iamatrust.com',
     domain: 'iamatrust.com',
     tags: ['AI', 'Legal Tech', 'Estate Planning'],
@@ -14,7 +13,7 @@ const websites = [
   {
     title: 'Vencat Consulting',
     description: 'Strategic consulting services leveraging AI to help businesses scale.',
-    thumbnail: null,
+    thumbnail: '/screenshots/vencat.png',
     url: 'https://vencat.com',
     domain: 'vencat.com',
     tags: ['Consulting', 'Business'],
@@ -22,7 +21,7 @@ const websites = [
   {
     title: 'Air Chuck Parts',
     description: 'E-commerce platform for industrial parts with smart inventory and search.',
-    thumbnail: null,
+    thumbnail: '/screenshots/airchuckparts.png',
     url: 'https://airchuckparts.com',
     domain: 'airchuckparts.com',
     tags: ['E-commerce', 'Industrial'],
@@ -30,7 +29,7 @@ const websites = [
   {
     title: 'VencatAI',
     description: 'Free AI-powered web scraping tool for automated data extraction.',
-    thumbnail: null,
+    thumbnail: '/screenshots/vencatai.png',
     url: 'https://vencatai.com',
     domain: 'vencatai.com',
     tags: ['AI Tool', 'Web Scraping'],

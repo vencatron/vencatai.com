@@ -4,28 +4,20 @@ import { WebsiteTile } from './Tile';
 // TODO: Replace with actual app data
 const apps = [
   {
-    title: 'Uncut Gems Marketplace',
+    title: 'Uncut Packaging',
     description: 'Full-featured e-commerce platform built with Next.js 15 and AI product recommendations.',
-    thumbnail: null, // Add screenshot URL
-    url: '#',
-    domain: 'uncut.demo',
+    thumbnail: '/screenshots/uncut.png',
+    url: 'https://uncut-tau.vercel.app',
+    domain: 'uncut-tau.vercel.app',
     tags: ['Next.js 15', 'E-commerce', 'AI'],
   },
   {
-    title: 'ScrapR Dashboard',
+    title: 'Web Flayer',
     description: 'Real-time web scraping dashboard with visual workflow builder.',
-    thumbnail: null,
-    url: '#',
-    domain: 'scrapr.demo',
+    thumbnail: '/screenshots/web-flayer.png',
+    url: 'https://web-flayer.vercel.app/',
+    domain: 'web-flayer.vercel.app',
     tags: ['Next.js', 'Dashboard', 'Real-time'],
-  },
-  {
-    title: 'AI Content Generator',
-    description: 'Multi-model AI content creation tool with brand voice training.',
-    thumbnail: null,
-    url: '#',
-    domain: 'content.demo',
-    tags: ['Next.js', 'AI', 'SaaS'],
   },
 ];
 
@@ -64,7 +56,7 @@ export default function NextJsApps() {
         </div>
 
         {/* Apps grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {apps.map((app, index) => (
             <WebsiteTile key={index} {...app} />
           ))}

@@ -6,30 +6,23 @@ const videos = [
   {
     title: 'AI-Generated Product Demo',
     description: 'Fully automated product showcase created with generative AI.',
-    thumbnail: null, // Add thumbnail URL
-    url: '#', // Add video URL (YouTube, Vimeo, etc.)
-    duration: '2:34',
-  },
-  {
-    title: 'Brand Story Animation',
-    description: 'AI-powered storytelling for modern brand narratives.',
-    thumbnail: null,
-    url: '#',
-    duration: '3:15',
+    thumbnail: '/screenshots/aura-pro-thumbnail.jpg',
+    url: '/videos/aura-pro-with-narration.mp4',
+    duration: '1:04',
   },
   {
     title: 'AI Commercial Spot',
     description: 'Full commercial created entirely with AI tools.',
-    thumbnail: null,
-    url: '#',
+    thumbnail: '/screenshots/uncut-commercial.png',
+    url: '/videos/uncut-packaging-v5.mp4',
     duration: '0:45',
   },
   {
     title: 'Explainer Video',
     description: 'Complex concepts simplified through AI-generated visuals.',
-    thumbnail: null,
-    url: '#',
-    duration: '4:20',
+    thumbnail: '/screenshots/bonus-depreciation-thumbnail.jpg',
+    url: '/videos/The_Power_of_Bonus_Depreciation.mp4',
+    duration: '1:07',
   },
 ];
 
@@ -68,7 +61,7 @@ export default function AIVideos() {
         </div>
 
         {/* Video grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {videos.map((video, index) => (
             <VideoTile key={index} {...video} />
           ))}

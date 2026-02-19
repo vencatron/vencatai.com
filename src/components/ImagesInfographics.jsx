@@ -1,43 +1,56 @@
 import { Image, Sparkles } from 'lucide-react';
 import { ImageTile } from './Tile';
+import img3dLogo from '../assets/3d-logo.png';
+import imgDiagram from '../assets/diagram.png';
+import imgPartnerJourney from '../assets/partner-journey-new.jpeg';
+import imgOrig from '../assets/orig.png';
+import imgStock from '../assets/2109.w026.n002.828B.p1.828.jpg';
+import imgDownload from '../assets/download.svg';
 
-// TODO: Replace with actual image data
+const capabilities = [
+  'High-Res 3D Logo Generation',
+  'Retro Pixel Art',
+  'Parallax Art Layers',
+  'Story-Driven Infographics',
+  'Data Visualizations',
+];
+
 const images = [
   {
-    title: 'AI Brand Identity Concept',
-    image: null, // Add image URL
+    title: 'High-Res 3D Logo',
+    image: img3dLogo,
+    url: null,
+    category: '3D Design',
+  },
+  {
+    title: 'Data Visualization',
+    image: imgDiagram,
+    url: null,
+    category: 'Data Viz',
+  },
+  {
+    title: 'Partner Journey Infographic',
+    image: imgPartnerJourney,
+    url: null,
+    category: 'Story Infographic',
+  },
+  {
+    title: 'Original AI Artwork',
+    image: imgOrig,
+    url: null,
+    category: 'Art',
+  },
+  {
+    title: 'AI Brand Visual',
+    image: imgStock,
     url: null,
     category: 'Branding',
   },
   {
-    title: 'Data Visualization Infographic',
-    image: null,
+    title: 'AI Icon Design',
+    image: imgDownload,
     url: null,
-    category: 'Infographic',
-  },
-  {
-    title: 'Product Launch Graphics',
-    image: null,
-    url: null,
-    category: 'Marketing',
-  },
-  {
-    title: 'Social Media Campaign',
-    image: null,
-    url: null,
-    category: 'Social',
-  },
-  {
-    title: 'Technical Architecture Diagram',
-    image: null,
-    url: null,
-    category: 'Technical',
-  },
-  {
-    title: 'AI-Generated Artwork',
-    image: null,
-    url: null,
-    category: 'Art',
+    category: 'Design',
   },
 ];
 
@@ -64,18 +77,28 @@ export default function ImagesInfographics() {
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
               Images & Infographics
             </h2>
-            <p className="text-slate-400 text-lg max-w-xl">
-              AI-generated visuals, infographics, and creative graphics for brands.
+            <p className="text-slate-400 text-lg max-w-xl mb-4">
+              From photorealistic renders to narrative data — AI makes it possible.
             </p>
+            <div className="flex flex-wrap gap-2">
+              {capabilities.map((cap) => (
+                <span
+                  key={cap}
+                  className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                >
+                  {cap}
+                </span>
+              ))}
+            </div>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Sparkles className="w-4 h-4 text-emerald-400" />
             <span>{images.length} images</span>
           </div>
         </div>
 
-        {/* Image grid - masonry-like with varied sizes */}
+        {/* Image grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {images.map((img, index) => (
             <ImageTile key={index} {...img} />
