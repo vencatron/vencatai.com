@@ -1,0 +1,184 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Definitions for gradients and shadows -->
+  <defs>
+    <!-- Drop shadow filter -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.1"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Gradients -->
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#66BB6A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFA726;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF9800;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Arrow markers -->
+    <marker id="arrow-blue" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto">
+      <path d="M 0 0 L 12 5 L 0 10 z" fill="#2196F3"/>
+    </marker>
+    
+    <marker id="arrow-green" markerWidth="12" markerHeight="10" refX="12" refY="5" orient="auto">
+      <path d="M 0 0 L 12 5 L 0 10 z" fill="#4CAF50"/>
+    </marker>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1400" height="900" fill="#F5F7FA"/>
+  
+  <!-- Title -->
+  <text x="700" y="50" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="32" font-weight="600" text-anchor="middle" fill="#1A202C">
+    LAPS Network Architecture
+  </text>
+  <text x="700" y="80" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle" fill="#718096">
+    Peloton Jamf Cloud Environment
+  </text>
+  
+  <!-- Cloud Zone Container -->
+  <g id="cloud-zone">
+    <rect x="100" y="120" width="1200" height="280" rx="16" fill="white" stroke="#E2E8F0" stroke-width="2" filter="url(#dropShadow)"/>
+    <rect x="100" y="120" width="1200" height="40" rx="16" fill="#EBF8FF"/>
+    <path d="M 100 160 L 1300 160" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="130" y="145" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="600" fill="#2B6CB0">☁️ Jamf Cloud Infrastructure</text>
+    
+    <!-- Jamf Pro Server -->
+    <g transform="translate(500, 220)">
+      <rect x="0" y="0" width="300" height="120" rx="12" fill="url(#blueGradient)" filter="url(#dropShadow)"/>
+      <text x="150" y="35" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="middle" fill="white">Jamf Pro Cloud</text>
+      <text x="150" y="60" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="14" font-weight="400" text-anchor="middle" fill="#B3E5FC">onepeloton.jamfcloud.com</text>
+      
+      <!-- LAPS Component -->
+      <rect x="20" y="75" width="260" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+      <text x="150" y="98" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="middle" fill="white">🔐 LAPS Service Module</text>
+    </g>
+    
+    <!-- IT Admin Access -->
+    <g transform="translate(950, 220)">
+      <rect x="0" y="0" width="220" height="120" rx="12" fill="url(#greenGradient)" filter="url(#dropShadow)"/>
+      <text x="110" y="35" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle" fill="white">IT Administrator</text>
+      <text x="110" y="60" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="400" text-anchor="middle" fill="#C8E6C9">Jamf Console Access</text>
+      
+      <rect x="15" y="75" width="190" height="35" rx="8" fill="rgba(255,255,255,0.2)"/>
+      <text x="110" y="98" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="white">👁️ View LAPS Passwords</text>
+    </g>
+  </g>
+  
+  <!-- Connection Flow -->
+  <g id="connections">
+    <!-- Admin to Jamf -->
+    <path d="M 950 280 L 850 280" stroke="#4CAF50" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arrow-green)" opacity="0.8"/>
+    <rect x="870" y="265" width="60" height="20" rx="10" fill="#E8F5E9"/>
+    <text x="900" y="278" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="500" text-anchor="middle" fill="#2E7D32">OAuth</text>
+  </g>
+  
+  <!-- Endpoints Zone -->
+  <g id="endpoints-zone">
+    <rect x="100" y="480" width="1200" height="280" rx="16" fill="white" stroke="#E2E8F0" stroke-width="2" filter="url(#dropShadow)"/>
+    <rect x="100" y="480" width="1200" height="40" rx="16" fill="#FFF8E1"/>
+    <path d="M 100 520 L 1300 520" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="130" y="505" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="600" fill="#F57C00">💻 Managed macOS Endpoints</text>
+    
+    <!-- Device Cards -->
+    <g transform="translate(250, 580)">
+      <rect x="0" y="0" width="220" height="140" rx="12" fill="url(#orangeGradient)" filter="url(#dropShadow)"/>
+      <rect x="0" y="0" width="220" height="45" rx="12" fill="rgba(255,255,255,0.15)"/>
+      <path d="M 0 45 L 220 45" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="110" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="white">macOS Device</text>
+      
+      <rect x="15" y="60" width="190" height="65" rx="8" fill="rgba(255,255,255,0.2)"/>
+      <text x="110" y="82" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="middle" fill="white">Local Admin Account</text>
+      <text x="110" y="102" font-family="Monaco, Consolas, monospace" font-size="14" font-weight="600" text-anchor="middle" fill="white">restricteduser</text>
+      <text x="110" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#FFF3E0">Hidden • LAPS Managed</text>
+    </g>
+    
+    <g transform="translate(550, 580)">
+      <rect x="0" y="0" width="220" height="140" rx="12" fill="url(#orangeGradient)" filter="url(#dropShadow)"/>
+      <rect x="0" y="0" width="220" height="45" rx="12" fill="rgba(255,255,255,0.15)"/>
+      <path d="M 0 45 L 220 45" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="110" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="white">macOS Device</text>
+      
+      <rect x="15" y="60" width="190" height="65" rx="8" fill="rgba(255,255,255,0.2)"/>
+      <text x="110" y="82" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="middle" fill="white">Local Admin Account</text>
+      <text x="110" y="102" font-family="Monaco, Consolas, monospace" font-size="14" font-weight="600" text-anchor="middle" fill="white">restricteduser</text>
+      <text x="110" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#FFF3E0">Hidden • LAPS Managed</text>
+    </g>
+    
+    <g transform="translate(850, 580)">
+      <rect x="0" y="0" width="220" height="140" rx="12" fill="url(#orangeGradient)" filter="url(#dropShadow)"/>
+      <rect x="0" y="0" width="220" height="45" rx="12" fill="rgba(255,255,255,0.15)"/>
+      <path d="M 0 45 L 220 45" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+      <text x="110" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle" fill="white">macOS Device</text>
+      
+      <rect x="15" y="60" width="190" height="65" rx="8" fill="rgba(255,255,255,0.2)"/>
+      <text x="110" y="82" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="500" text-anchor="middle" fill="white">Local Admin Account</text>
+      <text x="110" y="102" font-family="Monaco, Consolas, monospace" font-size="14" font-weight="600" text-anchor="middle" fill="white">restricteduser</text>
+      <text x="110" y="118" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="11" font-weight="400" text-anchor="middle" fill="#FFF3E0">Hidden • LAPS Managed</text>
+    </g>
+  </g>
+  
+  <!-- Connection Arrows -->
+  <g id="data-flow">
+    <!-- Jamf to Devices -->
+    <path d="M 580 340 L 360 580" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-blue)" opacity="0.7"/>
+    <path d="M 650 340 L 660 580" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-blue)" opacity="0.7"/>
+    <path d="M 720 340 L 960 580" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-blue)" opacity="0.7"/>
+    
+    <!-- Flow Labels -->
+    <g transform="translate(400, 450)">
+      <rect x="-50" y="-12" width="100" height="24" rx="12" fill="#E3F2FD"/>
+      <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#1565C0">Password Push</text>
+    </g>
+    
+    <g transform="translate(650, 450)">
+      <rect x="-45" y="-12" width="90" height="24" rx="12" fill="#E8F5E9"/>
+      <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#2E7D32">Check-in</text>
+    </g>
+    
+    <g transform="translate(900, 450)">
+      <rect x="-45" y="-12" width="90" height="24" rx="12" fill="#E3F2FD"/>
+      <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#1565C0">Policy Sync</text>
+    </g>
+  </g>
+  
+  <!-- Key Features -->
+  <g id="key-features">
+    <rect x="100" y="800" width="1200" height="70" rx="12" fill="#FAFBFC" stroke="#E2E8F0" stroke-width="1"/>
+    <text x="130" y="825" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="14" font-weight="600" fill="#2D3748">🔑 Key Features:</text>
+    
+    <g transform="translate(130, 845)">
+      <rect x="0" y="0" width="250" height="24" rx="12" fill="#EBF8FF"/>
+      <text x="125" y="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#2B6CB0">29-Character Passwords</text>
+    </g>
+    
+    <g transform="translate(400, 845)">
+      <rect x="0" y="0" width="200" height="24" rx="12" fill="#F0FDF4"/>
+      <text x="100" y="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#16A34A">1-Hour Rotation</text>
+    </g>
+    
+    <g transform="translate(620, 845)">
+      <rect x="0" y="0" width="200" height="24" rx="12" fill="#FFF8E1"/>
+      <text x="100" y="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#F57C00">Audit Logging</text>
+    </g>
+    
+    <g transform="translate(840, 845)">
+      <rect x="0" y="0" width="220" height="24" rx="12" fill="#F3E8FF"/>
+      <text x="110" y="16" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="12" font-weight="500" text-anchor="middle" fill="#7C3AED">Secure Cloud Storage</text>
+    </g>
+  </g>
+</svg>
