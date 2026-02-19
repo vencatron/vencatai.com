@@ -8,14 +8,13 @@ VencatAI Portfolio Site - a showcase of AI-powered work including videos, custom
 
 ## Directory Structure
 
-- **showcase/** - Main portfolio site (React + Vite + Tailwind)
+- **/** (root) - Main portfolio site (React + Vite + Tailwind)
 - **fire-splash/** - ScrapR marketing site (separate project, see its own README)
 
 ## Development Commands
 
 ### Showcase (Main Portfolio)
 ```bash
-cd showcase
 npm install          # Install dependencies
 npm run dev          # Start Vite dev server (http://localhost:5173)
 npm run build        # Production build to dist/
@@ -26,7 +25,7 @@ npm run preview      # Preview production build
 
 **Tech Stack:** React 18 + Vite 6 + Tailwind CSS 3 + Lucide Icons
 
-**Project Structure (showcase/src/):**
+**Project Structure (src/):**
 - `main.jsx` → Entry point
 - `App.jsx` → Main layout with all sections
 - `components/` → Reusable components:
