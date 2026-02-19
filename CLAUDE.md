@@ -1,56 +1,68 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## Project Overview
 
-Vencat ScrapR marketing website - a React SPA for a visual, no-code web scraping tool. Features a distinctive ASCII "DoomFire" animation effect on the homepage. Core value prop: ease of use - point, click, extract.
+VencatAI Portfolio Site - a showcase of AI-powered work including videos, custom websites, Next.js applications, and AI-generated images/infographics.
+
+## Directory Structure
+
+- **showcase/** - Main portfolio site (React + Vite + Tailwind)
+- **fire-splash/** - ScrapR marketing site (separate project, see its own README)
 
 ## Development Commands
 
+### Showcase (Main Portfolio)
 ```bash
-cd fire-splash
-npm install          # Install dependencies (uses npm ci via .npmrc)
-npm run dev          # Start Vite dev server
-npm run build        # TypeScript compile + Vite production build
-npm run lint         # ESLint with auto-fix
+cd showcase
+npm install          # Install dependencies
+npm run dev          # Start Vite dev server (http://localhost:5173)
+npm run build        # Production build to dist/
 npm run preview      # Preview production build
 ```
 
 ## Architecture
 
-**Tech Stack:** React 18 + TypeScript + Vite 6 + Tailwind CSS 4 + HeroUI component library
+**Tech Stack:** React 18 + Vite 6 + Tailwind CSS 3 + Lucide Icons
 
-**Project Structure (fire-splash/src/):**
-- `main.tsx` → Entry point, wraps app in BrowserRouter + HeroUIProvider
-- `App.tsx` → React Router routes
-- `provider.tsx` → HeroUI integration with React Router navigation
-- `pages/` → Route components (index, docs, pricing, blog, about)
-- `components/` → Reusable components including DoomFire animation
-- `layouts/default.tsx` → Standard page layout with navbar/footer
-- `config/site.ts` → Navigation items and external links
-- `components/primitives.ts` → Tailwind Variants style definitions
+**Project Structure (showcase/src/):**
+- `main.jsx` → Entry point
+- `App.jsx` → Main layout with all sections
+- `components/` → Reusable components:
+  - `Header.jsx` → Fixed navbar with mobile menu
+  - `Hero.jsx` → Landing section with animated background
+  - `SectionNav.jsx` → Sticky section navigation
+  - `AIVideos.jsx` → AI-generated video showcase
+  - `CustomWebsites.jsx` → Custom website portfolio
+  - `NextJsApps.jsx` → Next.js application showcase
+  - `ImagesInfographics.jsx` → Visual content gallery
+  - `Tile.jsx` → Reusable tile components (VideoTile, WebsiteTile, ImageTile)
+  - `Footer.jsx` → Footer with social links
 
-**Key Patterns:**
-- Path alias: `@/*` maps to `./src/*`
-- HeroUI components are the primary UI building blocks
-- Tailwind Variants (`tv()`) for composable component styles
-- Client-side routing only (Vercel configured for SPA rewrites)
+**Key Features:**
+- Glassmorphism design with cyber color palette
+- Fully responsive (mobile-first)
+- Smooth scroll navigation
+- Animated backgrounds with floating orbs
+- Modern glass-effect cards with hover states
 
-**DoomFire Component:** Custom ASCII fire animation using requestAnimationFrame, renders characters (` . : - = + X # & @`) at 240x60 resolution. Accepts `intensity` prop (0-1).
+## Adding Content
 
-## Code Style
+Each section component has a placeholder data array at the top. To add real content:
 
-ESLint enforces:
-- Import ordering: types → builtins → external → internal → parent → sibling → index
-- JSX props sorted alphabetically with callbacks last
-- Self-closing components when no children
-- Blank lines before returns and after variable declarations
-- `no-console` warnings
-- JSX accessibility rules (jsx-a11y)
-
-Prettier handles formatting.
+1. **Videos (AIVideos.jsx):** Add objects with `title`, `description`, `thumbnail` (URL), `url` (video link), `duration`
+2. **Websites (CustomWebsites.jsx):** Add objects with `title`, `description`, `thumbnail`, `url`, `domain`, `tags`
+3. **Apps (NextJsApps.jsx):** Same as websites
+4. **Images (ImagesInfographics.jsx):** Add objects with `title`, `image` (URL), `url` (optional link), `category`
 
 ## Deployment
 
-Deploys to Vercel. The `vercel.json` rewrites all routes to `/` for SPA routing.
+Deploys to Vercel. The `vercel.json` handles SPA routing.
+
+## Color Palette
+
+- `cyber-cyan`: #00f5ff
+- `cyber-purple`: #a855f7
+- `cyber-pink`: #ec4899
+- Background: slate-950 (#0a0a0f)
