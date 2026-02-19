@@ -1,26 +1,28 @@
 import { Video, Sparkles } from 'lucide-react';
 import { VideoTile } from './Tile';
+import auraThumbnail from '../assets/aura-pro-thumbnail.jpg';
+import bonusThumbnail from '../assets/bonus-depreciation-thumbnail.jpg';
+import uncutThumbnail from '../assets/uncut-commercial-thumbnail.jpg';
 
-// TODO: Replace with actual video data
 const videos = [
   {
     title: 'AI-Generated Product Demo',
     description: 'Fully automated product showcase created with generative AI.',
-    thumbnail: '/screenshots/aura-pro-thumbnail.jpg',
+    thumbnail: auraThumbnail,
     url: '/videos/aura-pro-with-narration.mp4',
     duration: '1:04',
   },
   {
     title: 'AI Commercial Spot',
     description: 'Full commercial created entirely with AI tools.',
-    thumbnail: '/screenshots/uncut-commercial.png',
+    thumbnail: uncutThumbnail,
     url: '/videos/uncut-packaging-v5.mp4',
     duration: '0:45',
   },
   {
     title: 'Explainer Video',
     description: 'Complex concepts simplified through AI-generated visuals.',
-    thumbnail: '/screenshots/bonus-depreciation-thumbnail.jpg',
+    thumbnail: bonusThumbnail,
     url: '/videos/The_Power_of_Bonus_Depreciation.mp4',
     duration: '1:07',
   },
@@ -53,7 +55,7 @@ export default function AIVideos() {
               Explore our collection of AI-generated video content, from commercials to explainers.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Sparkles className="w-4 h-4 text-cyber-pink" />
             <span>{videos.length} videos</span>

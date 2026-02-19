@@ -1,11 +1,15 @@
 import { Globe, Sparkles } from 'lucide-react';
 import { WebsiteTile } from './Tile';
+import iamatrustImg from '../assets/iamatrust.png';
+import vencatImg from '../assets/vencat.png';
+import airchuckImg from '../assets/airchuckparts.png';
+import vencataiImg from '../assets/vencatai.png';
 
 const websites = [
   {
     title: 'Generation Catalyst',
     description: 'AI-powered estate planning platform that simplifies trust creation and management.',
-    thumbnail: '/screenshots/iamatrust.png',
+    thumbnail: iamatrustImg,
     url: 'https://iamatrust.com',
     domain: 'iamatrust.com',
     tags: ['AI', 'Legal Tech', 'Estate Planning'],
@@ -13,7 +17,7 @@ const websites = [
   {
     title: 'Vencat Consulting',
     description: 'Strategic consulting services leveraging AI to help businesses scale.',
-    thumbnail: '/screenshots/vencat.png',
+    thumbnail: vencatImg,
     url: 'https://vencat.com',
     domain: 'vencat.com',
     tags: ['Consulting', 'Business'],
@@ -21,7 +25,7 @@ const websites = [
   {
     title: 'Air Chuck Parts',
     description: 'E-commerce platform for industrial parts with smart inventory and search.',
-    thumbnail: '/screenshots/airchuckparts.png',
+    thumbnail: airchuckImg,
     url: 'https://airchuckparts.com',
     domain: 'airchuckparts.com',
     tags: ['E-commerce', 'Industrial'],
@@ -29,7 +33,7 @@ const websites = [
   {
     title: 'VencatAI',
     description: 'Free AI-powered web scraping tool for automated data extraction.',
-    thumbnail: '/screenshots/vencatai.png',
+    thumbnail: vencataiImg,
     url: 'https://vencatai.com',
     domain: 'vencatai.com',
     tags: ['AI Tool', 'Web Scraping'],
@@ -63,7 +67,7 @@ export default function CustomWebsites() {
               Fully customized websites built with modern technologies and AI-assisted design.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Sparkles className="w-4 h-4 text-cyber-cyan" />
             <span>{websites.length} sites</span>

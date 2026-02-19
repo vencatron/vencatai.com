@@ -1,12 +1,13 @@
 import { Code2, Sparkles } from 'lucide-react';
 import { WebsiteTile } from './Tile';
+import uncutImg from '../assets/uncut.png';
+import webFlayerImg from '../assets/web-flayer.png';
 
-// TODO: Replace with actual app data
 const apps = [
   {
     title: 'Uncut Packaging',
     description: 'Full-featured e-commerce platform built with Next.js 15 and AI product recommendations.',
-    thumbnail: '/screenshots/uncut.png',
+    thumbnail: uncutImg,
     url: 'https://uncut-tau.vercel.app',
     domain: 'uncut-tau.vercel.app',
     tags: ['Next.js 15', 'E-commerce', 'AI'],
@@ -14,7 +15,7 @@ const apps = [
   {
     title: 'Web Flayer',
     description: 'Real-time web scraping dashboard with visual workflow builder.',
-    thumbnail: '/screenshots/web-flayer.png',
+    thumbnail: webFlayerImg,
     url: 'https://web-flayer.vercel.app/',
     domain: 'web-flayer.vercel.app',
     tags: ['Next.js', 'Dashboard', 'Real-time'],
@@ -48,7 +49,7 @@ export default function NextJsApps() {
               Production-ready web applications built with Next.js, React, and modern frameworks.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Sparkles className="w-4 h-4 text-cyber-purple" />
             <span>{apps.length} apps</span>
