@@ -6,10 +6,17 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply bg-slate-950 text-white antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Improve touch responsiveness on all interactive elements */
+  a, button {
+    touch-action: manipulation;
   }
 }
 
@@ -17,7 +24,7 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-cyber-cyan via-cyber-purple to-cyber-pink;
   }
-  
+
   /* Enhanced glassmorphism */
   .glass {
     background: rgba(255, 255, 255, 0.03);
@@ -25,7 +32,7 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
-  
+
   .glass-card {
     background: linear-gradient(
       135deg,
@@ -35,65 +42,137 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
-  
+
   .glass-hover {
-    @apply transition-all duration-500 ease-out;
+    @apply transition-all duration-300 ease-out;
   }
-  
-  .glass-hover:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-4px);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.4),
-      0 0 60px rgba(0, 245, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  /* Hover effects only on pointer devices, not touch */
+  @media (hover: hover) and (pointer: fine) {
+    .glass-hover:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 245, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
   }
-  
+
+  /* Touch active feedback instead of hover */
+  @media (hover: none) {
+    .glass-hover:active {
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(0.98);
+    }
+  }
+
   .glow-cyan {
     box-shadow: 0 0 60px rgba(0, 245, 255, 0.25);
   }
-  
+
   .glow-purple {
     box-shadow: 0 0 60px rgba(168, 85, 247, 0.25);
   }
-  
+
   .glow-pink {
     box-shadow: 0 0 60px rgba(236, 72, 153, 0.25);
   }
 
   /* Button styles */
   .btn-primary {
-    @apply relative px-6 py-3 rounded-xl font-semibold text-white overflow-hidden;
+    @apply relative px-6 py-3.5 rounded-xl font-semibold text-white overflow-hidden;
     background: linear-gradient(135deg, #00f5ff 0%, #a855f7 50%, #ec4899 100%);
     background-size: 200% 200%;
     animation: gradient-shift 3s ease infinite;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  
-  .btn-primary:hover {
-    transform: scale(1.02);
-    box-shadow: 0 10px 40px rgba(0, 245, 255, 0.3);
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 40px rgba(0, 245, 255, 0.3);
+    }
   }
-  
+
+  @media (hover: none) {
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+  }
+
   .btn-glass {
-    @apply px-6 py-3 rounded-xl font-semibold glass glass-hover;
+    @apply px-6 py-3.5 rounded-xl font-semibold glass glass-hover;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Safe area utilities */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .pl-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+  }
+  .pr-safe {
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  /* Hide scrollbar but keep scrollability */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* Tile thumbnail container */
   .tile-thumb {
     @apply relative w-full aspect-video overflow-hidden rounded-t-2xl;
   }
-  
+
   .tile-thumb img {
     @apply w-full h-full object-cover transition-transform duration-700;
   }
-  
-  .tile-thumb:hover img {
-    transform: scale(1.05);
+
+  @media (hover: hover) and (pointer: fine) {
+    .tile-thumb:hover img {
+      transform: scale(1.05);
+    }
+  }
+}
+
+/* SectionNav sticky position — just below the fixed header, respects safe-area-inset-top */
+.nav-sticky-top {
+  top: 4rem; /* h-16 = 64px */
+}
+@media (min-width: 640px) {
+  .nav-sticky-top {
+    top: 5rem; /* h-20 = 80px */
+  }
+}
+@supports (top: env(safe-area-inset-top)) {
+  .nav-sticky-top {
+    top: calc(4rem + env(safe-area-inset-top, 0px));
+  }
+  @media (min-width: 640px) {
+    .nav-sticky-top {
+      top: calc(5rem + env(safe-area-inset-top, 0px));
+    }
   }
 }
 
@@ -129,21 +208,23 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
+/* Custom scrollbar — desktop only */
+@media (hover: hover) and (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
 
-::-webkit-scrollbar-track {
-  @apply bg-slate-900/50;
-}
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-900/50;
+  }
 
-::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-cyber-cyan to-cyber-purple rounded-full;
-}
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-cyber-cyan to-cyber-purple rounded-full;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  @apply opacity-80;
+  ::-webkit-scrollbar-thumb:hover {
+    @apply opacity-80;
+  }
 }
 
 /* Mobile optimizations */
