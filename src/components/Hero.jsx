@@ -3,14 +3,14 @@ import { Sparkles, ArrowDown } from 'lucide-react';
 export default function Hero() {
   return (
     <section className="relative min-h-[100svh] sm:min-h-[85vh] flex items-center justify-center overflow-hidden">
-      {/* Animated gradient background */}
+      {/* Animated gradient background — black on mobile for robot video compatibility */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+        <div className="absolute inset-0 bg-black sm:bg-gradient-to-br sm:from-slate-950 sm:via-slate-900 sm:to-slate-950" />
 
-        {/* Floating orbs — scaled down on mobile to prevent perf issues */}
-        <div className="absolute top-1/4 left-1/4 w-48 h-48 sm:w-80 sm:h-80 lg:w-[500px] lg:h-[500px] bg-cyber-cyan/15 rounded-full blur-[80px] sm:blur-[100px] animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 sm:w-64 sm:h-64 lg:w-[400px] lg:h-[400px] bg-cyber-purple/15 rounded-full blur-[80px] sm:blur-[100px] animate-float" style={{ animationDelay: '-3s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 h-56 sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px] bg-cyber-pink/10 rounded-full blur-[80px] sm:blur-[120px] animate-float" style={{ animationDelay: '-1.5s' }} />
+        {/* Floating orbs — hidden on mobile, visible on desktop */}
+        <div className="hidden sm:block absolute top-1/4 left-1/4 w-80 lg:w-[500px] h-80 lg:h-[500px] bg-cyber-cyan/15 rounded-full blur-[100px] animate-float" />
+        <div className="hidden sm:block absolute bottom-1/4 right-1/4 w-64 lg:w-[400px] h-64 lg:h-[400px] bg-cyber-purple/15 rounded-full blur-[100px] animate-float" style={{ animationDelay: '-3s' }} />
+        <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] lg:w-[600px] h-[400px] lg:h-[600px] bg-cyber-pink/10 rounded-full blur-[120px] animate-float" style={{ animationDelay: '-1.5s' }} />
 
         {/* Grid overlay */}
         <div
