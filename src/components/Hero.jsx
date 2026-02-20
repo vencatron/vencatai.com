@@ -44,6 +44,7 @@ export default function Hero() {
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/3 h-[280px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-auto object-contain opacity-90 pointer-events-none z-0 mix-blend-screen"
           >
             <source src="/videos/robot-transparent.webm" type="video/webm" />
+            <source src="/videos/robot-cropped.mp4" type="video/mp4" />
           </video>
           
           <h1
