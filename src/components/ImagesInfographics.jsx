@@ -6,6 +6,8 @@ import imgPartnerJourney from '../assets/partner-journey-new.jpeg';
 import imgOrig from '../assets/orig.png';
 import imgStock from '../assets/2109.w026.n002.828B.p1.828.jpg';
 import imgDownload from '../assets/download.svg';
+import imgGlassDashboard from '../assets/glassmorphic-app-dashboard.png';
+import imgGlassIphone from '../assets/glassmorphic-iphone-floating.png';
 
 const capabilities = [
   'High-Res 3D Logo Generation',
@@ -13,6 +15,7 @@ const capabilities = [
   'Parallax Art Layers',
   'Story-Driven Infographics',
   'Data Visualizations',
+  'Glassmorphic 3D',
 ];
 
 const images = [
@@ -51,6 +54,18 @@ const images = [
     image: imgDownload,
     url: null,
     category: 'Design',
+  },
+  {
+    title: 'Glassmorphic App Interface',
+    image: imgGlassDashboard,
+    url: null,
+    category: 'Glassmorphic 3D',
+  },
+  {
+    title: 'Floating iPhone Concept',
+    image: imgGlassIphone,
+    url: null,
+    category: 'Glassmorphic 3D',
   },
 ];
 
