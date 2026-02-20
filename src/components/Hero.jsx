@@ -33,14 +33,27 @@ export default function Hero() {
           <span className="text-xs sm:text-sm font-medium text-slate-200">Venture Catalyst AI Portfolio</span>
         </div>
 
-        {/* Main heading */}
-        <h1
-          className="text-[2.6rem] leading-[1.1] sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 sm:mb-8 animate-slide-up"
-          style={{ animationDelay: '0.1s' }}
-        >
-          <span className="block text-white mb-1 sm:mb-2">Built with</span>
-          <span className="text-gradient">Artificial Intelligence</span>
-        </h1>
+        {/* Main heading with robot video */}
+        <div className="relative inline-block">
+          {/* Robot video behind heading */}
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/4 sm:translate-x-1/3 h-[280px] sm:h-[350px] md:h-[450px] lg:h-[550px] w-auto object-contain opacity-90 pointer-events-none z-0"
+          >
+            <source src="/robot-hero.mp4" type="video/mp4" />
+          </video>
+          
+          <h1
+            className="relative z-10 text-[2.6rem] leading-[1.1] sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 sm:mb-8 animate-slide-up"
+            style={{ animationDelay: '0.1s' }}
+          >
+            <span className="block text-white mb-1 sm:mb-2">Built with</span>
+            <span className="text-gradient">Artificial Intelligence</span>
+          </h1>
+        </div>
 
         {/* Subtitle */}
         <p
