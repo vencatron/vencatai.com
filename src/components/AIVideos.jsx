@@ -3,8 +3,16 @@ import { VideoTile } from './Tile';
 import auraThumbnail from '../assets/aura-pro-thumbnail.jpg';
 import bonusThumbnail from '../assets/bonus-depreciation-thumbnail.jpg';
 import uncutThumbnail from '../assets/uncut-commercial-thumbnail.jpg';
+import showcaseThumbnail from '../assets/ai-showcase-thumbnail.jpg';
 
 const videos = [
+  {
+    title: 'AI Capabilities Showcase',
+    description: 'See what\'s possible — cinematic visuals generated entirely by AI.',
+    thumbnail: showcaseThumbnail,
+    url: '/videos/ai-showcase-narrated.mp4',
+    duration: '0:41',
+  },
   {
     title: 'AI-Generated Product Demo',
     description: 'Fully automated product showcase created with generative AI.',
