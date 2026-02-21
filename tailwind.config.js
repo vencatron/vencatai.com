@@ -11,7 +11,6 @@ export default {
           cyan: '#00f5ff',
           purple: '#a855f7',
           pink: '#ec4899',
-          blue: '#3b82f6',
         },
         'slate': {
           950: '#0a0a0f',
