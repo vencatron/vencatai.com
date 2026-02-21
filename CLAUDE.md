@@ -9,7 +9,6 @@ VencatAI Portfolio Site - a showcase of AI-powered work including videos, custom
 ## Directory Structure
 
 - **/** (root) - Main portfolio site (React + Vite + Tailwind)
-- **fire-splash/** - ScrapR marketing site (separate project, see its own README)
 
 ## Development Commands
 
