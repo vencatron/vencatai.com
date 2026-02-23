@@ -33,7 +33,7 @@ export default function Footer() {
                 href={href}
                 target={href.startsWith('mailto') ? undefined : '_blank'}
                 rel={href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
-                className="p-3 rounded-xl glass glass-hover"
+                className="group p-3 rounded-xl glass glass-hover"
                 aria-label={label}
               >
                 <Icon className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
