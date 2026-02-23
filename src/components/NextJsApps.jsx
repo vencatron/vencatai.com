@@ -58,8 +58,8 @@ export default function NextJsApps() {
 
         {/* Apps grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {apps.map((app, index) => (
-            <WebsiteTile key={index} {...app} />
+          {apps.map((app) => (
+            <WebsiteTile key={app.url} {...app} />
           ))}
         </div>
       </div>

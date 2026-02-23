@@ -115,8 +115,8 @@ export default function ImagesInfographics() {
 
         {/* Image grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {images.map((img, index) => (
-            <ImageTile key={index} {...img} />
+          {images.map((img) => (
+            <ImageTile key={img.title} {...img} />
           ))}
         </div>
       </div>
