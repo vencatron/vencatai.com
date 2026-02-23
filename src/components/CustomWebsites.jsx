@@ -76,8 +76,8 @@ export default function CustomWebsites() {
 
         {/* Website grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {websites.map((site, index) => (
-            <WebsiteTile key={index} {...site} />
+          {websites.map((site) => (
+            <WebsiteTile key={site.url} {...site} />
           ))}
         </div>
       </div>
