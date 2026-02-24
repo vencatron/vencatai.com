@@ -4,7 +4,7 @@ import img3dLogo from '../assets/3d-logo.png';
 import imgDiagram from '../assets/diagram.png';
 import imgPartnerJourney from '../assets/partner-journey-new.jpeg';
 import imgOrig from '../assets/orig.png';
-import imgStock from '../assets/2109.w026.n002.828B.p1.828.jpg';
+import imgParallax from '../assets/parallax-layered-scroll.jpg';
 import imgDownload from '../assets/download.svg';
 import imgGlassDashboard from '../assets/glassmorphic-app-dashboard.png';
 import imgGlassIphone from '../assets/glassmorphic-iphone-floating.png';
@@ -45,7 +45,7 @@ const images = [
   },
   {
     title: 'Parallax Layered Scroll Artifacts',
-    image: imgStock,
+    image: imgParallax,
     url: null,
     category: 'Branding',
   },
