@@ -94,9 +94,9 @@ export function WebsiteTile({ title, description, thumbnail, url, domain, tags }
         {/* Tags */}
         {tags && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag, i) => (
+            {tags.map((tag) => (
               <span
-                key={i}
+                key={tag}
                 className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium bg-white/5 text-slate-300 border border-white/10"
               >
                 {tag}
