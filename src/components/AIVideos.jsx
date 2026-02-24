@@ -24,7 +24,7 @@ const videos = [
     title: 'AI Commercial Spot',
     description: 'Full commercial created entirely with AI tools.',
     thumbnail: uncutThumbnail,
-    url: '/videos/uncut-packaging-v5.mp4',
+    url: '/videos/uncut-packaging-v7.mp4',
     duration: '0:45',
   },
   {
