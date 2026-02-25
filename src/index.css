@@ -118,7 +118,6 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
 }
 
 /* SectionNav sticky position — just below the fixed header, respects safe-area-inset-top */
