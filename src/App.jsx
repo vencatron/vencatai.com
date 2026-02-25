@@ -7,7 +7,7 @@ import NextJsApps from './components/NextJsApps';
 import ImagesInfographics from './components/ImagesInfographics';
 import Footer from './components/Footer';
 
-function App() {
+export default function App() {
   return (
     <div className="min-h-screen bg-slate-950">
       <Header />
@@ -23,5 +23,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
