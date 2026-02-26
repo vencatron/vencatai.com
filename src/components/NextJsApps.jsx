@@ -16,7 +16,7 @@ const apps = [
     title: 'Web Flayer',
     description: 'Real-time web scraping dashboard with visual workflow builder.',
     thumbnail: webFlayerImg,
-    url: 'https://web-flayer.vercel.app/',
+    url: 'https://web-flayer.vercel.app',
     domain: 'web-flayer.vercel.app',
     tags: ['Next.js', 'Dashboard', 'Real-time'],
   },
