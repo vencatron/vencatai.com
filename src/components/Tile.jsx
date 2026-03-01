@@ -115,7 +115,7 @@ export function ImageTile({ title, image, url, category }) {
       href={url || image}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-2xl glass-card overflow-hidden active:scale-[0.98] transition-transform"
+      className="group block rounded-2xl glass-card glass-hover overflow-hidden active:scale-[0.98] transition-transform"
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden">
