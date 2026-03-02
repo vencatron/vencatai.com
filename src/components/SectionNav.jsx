@@ -11,7 +11,7 @@ export default function SectionNav() {
   return (
     /* nav-sticky-top is defined in index.css — keeps this just below the fixed header
        and correctly accounts for safe-area-inset-top on iPhone notch devices */
-    <section className="py-3 sm:py-4 sticky nav-sticky-top z-40 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
+    <nav aria-label="Portfolio sections" className="py-3 sm:py-4 sticky nav-sticky-top z-40 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-hide">
           {sections.map((section) => (
@@ -30,6 +30,6 @@ export default function SectionNav() {
           ))}
         </div>
       </div>
-    </section>
+    </nav>
   );
 }

@@ -1,5 +1,5 @@
-import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
