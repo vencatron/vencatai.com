@@ -56,7 +56,9 @@ Each section component has a placeholder data array at the top. To add real cont
 
 ## Deployment
 
-Deploys to Vercel. The `vercel.json` handles SPA routing.
+Deploys to Vercel. The `vercel.json` handles:
+- SPA routing (all routes → index.html)
+- Security headers (CSP, HSTS, X-Frame-Options, etc.)
 
 ## Color Palette
 
