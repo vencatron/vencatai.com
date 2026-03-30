@@ -1,5 +1,6 @@
 import Header from './components/Header';
 import Hero from './components/Hero';
+import TerminalHero from './components/TerminalHero';
 import SectionNav from './components/SectionNav';
 import AIVideos from './components/AIVideos';
 import CustomWebsites from './components/CustomWebsites';
@@ -13,6 +14,7 @@ export default function App() {
       <Header />
       <main>
         <Hero />
+        <TerminalHero />
         <SectionNav />
         <AIVideos />
         <CustomWebsites />
