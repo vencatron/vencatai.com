@@ -4,6 +4,7 @@ import auraThumbnail from '../assets/aura-pro-thumbnail.jpg';
 import bonusThumbnail from '../assets/bonus-depreciation-thumbnail.jpg';
 import uncutThumbnail from '../assets/uncut-commercial-thumbnail.jpg';
 import showcaseThumbnail from '../assets/ai-showcase-thumbnail.jpg';
+import geometryThumbnail from '../assets/geometry-boss-thumbnail.jpg';
 
 const videos = [
   {
@@ -33,6 +34,13 @@ const videos = [
     thumbnail: bonusThumbnail,
     url: '/videos/The_Power_of_Bonus_Depreciation.mp4',
     duration: '1:07',
+  },
+  {
+    title: 'AI Boss Fight',
+    description: 'Generative AI short film — geometry, motion, and chaos.',
+    thumbnail: geometryThumbnail,
+    url: '/videos/The_Geometry_Boss_Fight.mp4',
+    duration: '2:59',
   },
 ];
 
@@ -67,6 +75,7 @@ export default function AIVideos() {
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Sparkles className="w-4 h-4 text-cyber-pink" />
             <span>{videos.length} videos</span>
+
           </div>
         </div>
 
