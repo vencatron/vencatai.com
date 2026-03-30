@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 
-const FULL_TEXT = "Venture Catalyst LLC uses tools like Claude Code and Codex CLI to build websites by hand with the guidance of the highest end 'thinking' frontier flagship models to date.";
+const FULL_TEXT = "We ship real products — websites, Next.js apps, and cinematic AI videos — built fast, built right, with no templates and no shortcuts. Just frontier models and a keyboard.";
 
 const LINES_BEFORE = [
   { text: '~ vencat.ai', bold: true, color: 'text-cyber-cyan' },
