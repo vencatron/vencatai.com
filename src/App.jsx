@@ -6,6 +6,7 @@ import AIVideos from './components/AIVideos';
 import CustomWebsites from './components/CustomWebsites';
 import NextJsApps from './components/NextJsApps';
 import ImagesInfographics from './components/ImagesInfographics';
+import ImageGallery from './components/ImageGallery';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <AIVideos />
         <CustomWebsites />
         <NextJsApps />
+        <ImageGallery />
         <ImagesInfographics />
       </main>
       <Footer />
