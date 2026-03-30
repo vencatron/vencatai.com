@@ -37,7 +37,7 @@ const videos = [
   },
   {
     title: 'AI Boss Fight',
-    description: 'Generative AI short film — geometry, motion, and chaos.',
+    description: 'AI-generated math explainer — visualizing geometric concepts in motion.',
     thumbnail: geometryThumbnail,
     url: '/videos/The_Geometry_Boss_Fight.mp4',
     duration: '2:59',
