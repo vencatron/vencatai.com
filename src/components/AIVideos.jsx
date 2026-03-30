@@ -5,6 +5,7 @@ import bonusThumbnail from '../assets/bonus-depreciation-thumbnail.jpg';
 import uncutThumbnail from '../assets/uncut-commercial-thumbnail.jpg';
 import showcaseThumbnail from '../assets/ai-showcase-thumbnail.jpg';
 import geometryThumbnail from '../assets/geometry-boss-thumbnail.jpg';
+import cosmosThumbnail from '../assets/cosmos-thumbnail.jpg';
 
 const videos = [
   {
@@ -41,6 +42,13 @@ const videos = [
     thumbnail: geometryThumbnail,
     url: '/videos/The_Geometry_Boss_Fight.mp4',
     duration: '2:59',
+  },
+  {
+    title: 'Cosmos in a Lifetime',
+    description: 'AI-generated science explainer — the scale of the universe visualized.',
+    thumbnail: cosmosThumbnail,
+    url: '/videos/Cosmos_in_a_Lifetime_.mp4',
+    duration: '2:10',
   },
 ];
 
