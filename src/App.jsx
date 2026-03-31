@@ -12,6 +12,17 @@ import Footer from './components/Footer';
 export default function App() {
   return (
     <div className="min-h-screen bg-slate-950">
+      {/* Global grid background */}
+      <div
+        className="fixed inset-0 pointer-events-none z-[1]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+        }}
+      />
       <GridGlow />
       <Header />
       <main>
