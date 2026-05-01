@@ -1,7 +1,7 @@
 import Header from './components/Header';
 import GridGlow from './components/GridGlow';
 import Hero from './components/Hero';
-import TerminalHero from './components/TerminalHero';
+import VortexFeature from './components/VortexFeature';
 import SectionNav from './components/SectionNav';
 import AIVideos from './components/AIVideos';
 import CustomWebsites from './components/CustomWebsites';
@@ -27,7 +27,7 @@ export default function App() {
       <Header />
       <main>
         <Hero />
-        <TerminalHero />
+        <VortexFeature />
         <SectionNav />
         <AIVideos />
         <CustomWebsites />

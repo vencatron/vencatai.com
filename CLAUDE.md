@@ -30,6 +30,7 @@ npm run preview      # Preview production build
 - `components/` → Reusable components:
   - `Header.jsx` → Fixed navbar with mobile menu
   - `Hero.jsx` → Landing section with animated background
+  - `VortexFeature.jsx` → Vortex canvas feature section replacing the old terminal typing block
   - `SectionNav.jsx` → Sticky section navigation
   - `AIVideos.jsx` → AI-generated video showcase
   - `CustomWebsites.jsx` → Custom website portfolio
