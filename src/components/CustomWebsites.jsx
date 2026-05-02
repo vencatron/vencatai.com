@@ -3,7 +3,7 @@ import { WebsiteTile } from './Tile';
 import iamatrustImg from '../assets/iamatrust.png';
 import vencatImg from '../assets/vencat.png';
 import airchuckImg from '../assets/airchuckparts.png';
-import vencataiImg from '../assets/vencatai.png';
+import claremontImg from '../assets/claremont.png';
 
 const websites = [
   {
@@ -31,12 +31,12 @@ const websites = [
     tags: ['E-commerce', 'Industrial'],
   },
   {
-    title: 'VencatAI',
-    description: 'Free AI-powered web scraping tool for automated data extraction.',
-    thumbnail: vencataiImg,
-    url: 'https://vencatai.com',
-    domain: 'vencatai.com',
-    tags: ['AI Tool', 'Web Scraping'],
+    title: 'Claremont Life',
+    description: 'The definitive living guide for students at the 7 Claremont Colleges.',
+    thumbnail: claremontImg,
+    url: 'https://claremont.life',
+    domain: 'claremont.life',
+    tags: ['Next.js', 'College Guide'],
   },
 ];
 
