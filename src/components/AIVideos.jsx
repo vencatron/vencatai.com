@@ -27,7 +27,7 @@ const videos = [
     description: 'Full commercial created entirely with AI tools.',
     thumbnail: uncutThumbnail,
     url: '/videos/uncut-packaging-v7.mp4',
-    duration: '0:45',
+    duration: '0:23',
   },
   {
     title: 'Explainer Video',

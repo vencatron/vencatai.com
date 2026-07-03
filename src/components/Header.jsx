@@ -50,6 +50,7 @@ export default function Header() {
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden p-3 rounded-xl glass"
               aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
