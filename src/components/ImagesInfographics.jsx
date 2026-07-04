@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Image, Sparkles, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ImageTile } from './Tile';
-import img3dLogo from '../assets/3d-logo.png';
+import img3dLogo from '../assets/3d-logo.webp';
 import imgDiagram from '../assets/diagram.png';
 import imgPartnerJourney from '../assets/partner-journey-new.jpeg';
 import imgOrig from '../assets/orig.png';
 import imgParallax from '../assets/parallax-layered-scroll.jpg';
 import imgDownload from '../assets/download.svg';
-import imgGlassDashboard from '../assets/glassmorphic-app-dashboard.png';
-import imgGlassIphone from '../assets/glassmorphic-iphone-floating.png';
+import imgGlassDashboard from '../assets/glassmorphic-app-dashboard.webp';
+import imgGlassIphone from '../assets/glassmorphic-iphone-floating.webp';
+
+// Web-sized WebP derivatives generated from the 4K originals in /images/ai-gallery
+const gallerySrc = (file, size) => `/images/ai-gallery/web/${file.replace(/\.png$/, '')}-${size}.webp`;
 
 const aiGallery = [
   { file: '01-bioluminescent-ocean.png', title: 'Bioluminescent Ocean', desc: 'Deep sea jellyfish, glowing blue and violet' },
@@ -88,6 +91,24 @@ export default function ImagesInfographics() {
   const prev = () => setLightbox(i => (i - 1 + aiGallery.length) % aiGallery.length);
   const next = () => setLightbox(i => (i + 1) % aiGallery.length);
 
+  // While the lightbox is open: close on Escape, navigate with arrow keys,
+  // and lock body scroll so the page doesn't move underneath the overlay.
+  useEffect(() => {
+    if (lightbox === null) return undefined;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setLightbox(null);
+      else if (e.key === 'ArrowLeft') prev();
+      else if (e.key === 'ArrowRight') next();
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [lightbox]);
+
   return (
     <section id="images" className="py-12 sm:py-20 lg:py-28 relative bg-slate-900/30 scroll-mt-36 sm:scroll-mt-40">
       {/* Background accent */}
@@ -158,7 +179,7 @@ export default function ImagesInfographics() {
               >
                 <div className="relative overflow-hidden">
                   <img
-                    src={`/images/ai-gallery/${img.file}`}
+                    src={gallerySrc(img.file, 'w960')}
                     alt={img.title}
                     className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
@@ -181,15 +202,15 @@ export default function ImagesInfographics() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
           onClick={() => setLightbox(null)}
         >
-          <button className="absolute top-4 right-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={() => setLightbox(null)}>
+          <button aria-label="Close image viewer" className="absolute top-4 right-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={() => setLightbox(null)}>
             <X className="w-6 h-6" />
           </button>
-          <button className="absolute left-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={e => { e.stopPropagation(); prev(); }}>
+          <button aria-label="Previous image" className="absolute left-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={e => { e.stopPropagation(); prev(); }}>
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div className="max-w-5xl max-h-[90vh] mx-12 flex flex-col items-center gap-4" onClick={e => e.stopPropagation()}>
             <img
-              src={`/images/ai-gallery/${aiGallery[lightbox].file}`}
+              src={gallerySrc(aiGallery[lightbox].file, 'w2000')}
               alt={aiGallery[lightbox].title}
               className="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl"
             />
@@ -198,7 +219,7 @@ export default function ImagesInfographics() {
               <p className="text-slate-400 text-sm">{aiGallery[lightbox].desc}</p>
             </div>
           </div>
-          <button className="absolute right-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={e => { e.stopPropagation(); next(); }}>
+          <button aria-label="Next image" className="absolute right-4 p-2 rounded-full glass text-white hover:bg-white/10 transition-colors" onClick={e => { e.stopPropagation(); next(); }}>
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>

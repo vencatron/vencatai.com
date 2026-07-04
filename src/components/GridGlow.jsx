@@ -64,6 +64,9 @@ export default function GridGlow() {
       if (cellKey !== lastCellKey) {
         lastCellKey = cellKey;
 
+        // Restart the render loop if it went idle
+        if (animId === null) animId = requestAnimationFrame(draw);
+
         // Pick next color, cycling through palette
         const color = COLORS[colorIndex % COLORS.length];
         colorIndex++;
@@ -118,11 +121,16 @@ export default function GridGlow() {
     document.addEventListener('touchmove', onTouchMove, { passive: true });
 
     function draw() {
-      animId = requestAnimationFrame(draw);
-
       const w = window.innerWidth;
       const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
+
+      // Go idle when nothing is lit — no need to burn frames while the cursor rests
+      if (litCells.size === 0) {
+        animId = null;
+        return;
+      }
+      animId = requestAnimationFrame(draw);
 
       const toDelete = [];
 
